@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -37,9 +38,11 @@ export default function Home() {
             <p className="text-slate-500 text-sm mt-1">Select an option to continue</p>
           </div>
 
-          <button className="btn btn-primary btn-md w-full rounded-xl text-sm tracking-wide">
-            Take Survey
-          </button>
+          <Link href={'/DataPrivacy'}>
+            <button className="btn btn-primary btn-md w-full rounded-xl text-sm tracking-wide">
+              Take Survey
+            </button>
+          </Link>
           <button className="btn btn-outline btn-primary btn-md w-full rounded-xl text-sm tracking-wide">
             Login to Dashboard
           </button>
