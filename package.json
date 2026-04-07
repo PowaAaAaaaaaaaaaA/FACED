@@ -9,6 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@tanstack/react-form": "^1.28.6",
+    "@tanstack/react-form-nextjs": "^1.28.6",
+    "@tanstack/react-form-remix": "^1.28.6",
+    "@tanstack/react-form-start": "^1.28.6",
     "lucide-react": "^1.6.0",
     "next": "16.1.7",
     "react": "19.2.3",
