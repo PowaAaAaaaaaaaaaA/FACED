@@ -1,8 +1,10 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@plugin "daisyui" {
+  themes: light --default;
+}
 
 :root {
-  --background: #ffffff;
+  --background: #e0e0e0;
   --foreground: #171717;
 }
 
@@ -13,10 +15,10 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #e0e0e0;
+    --foreground: #171717;
   }
 }
 
