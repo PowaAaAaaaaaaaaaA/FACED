@@ -18,7 +18,7 @@
     "@tanstack/react-store": "^0.11.0",
     "@tanstack/zod-form-adapter": "^0.42.1",
     "dotenv": "^17.4.2",
-    "lucide-react": "^1.6.0",
+    "lucide-react": "^1.14.0",
     "next": "16.1.7",
     "react": "19.2.3",
     "react-dom": "19.2.3",

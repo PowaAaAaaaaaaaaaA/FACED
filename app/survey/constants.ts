@@ -11,6 +11,73 @@ export const CIVIL_STATUS_OPTIONS = [
 
 export const SEX_OPTIONS = ['Male', 'Female']
 
+export const RELIGIONS = [
+  // Christian
+  'Roman Catholic',
+  'Iglesia ni Cristo',
+  'Born Again Christian',
+  'Baptist',
+  'Seventh-day Adventist',
+  'United Church of Christ in the Philippines (UCCP)',
+  'Anglican / Episcopalian',
+  'Methodist',
+  'Lutheran',
+  'Presbyterian',
+  'Pentecostal',
+  'Jehovah\'s Witnesses',
+  'Church of Jesus Christ of Latter-day Saints (Mormon)',
+  'Aglipayan (Philippine Independent Church)',
+
+  // Non-Christian
+  'Islam',
+  'Buddhism',
+  'Hinduism',
+  'Judaism',
+
+  // Indigenous / Traditional
+  'Indigenous Beliefs / Animism',
+
+  // Other
+  'Other',
+  'None / No Religion',
+  'Atheist',
+  'Agnostic',
+  'Prefer not to say',
+]
+
+export const VALID_IDS = [
+  // Government-issued primary IDs
+  'Philippine Passport',
+  'SSS ID (Social Security System)',
+  'GSIS ID (Government Service Insurance System)',
+  'PhilHealth ID',
+  'Pag-IBIG ID (HDMF)',
+  'Philippine National ID (PhilSys)',
+  'Voter\'s ID / Voter\'s Certification',
+  'Driver\'s License (LTO)',
+  'PRC ID (Professional Regulation Commission)',
+  'NBI Clearance',
+  'Police Clearance',
+  'Postal ID',
+  'Senior Citizen ID',
+  'PWD ID (Person with Disability)',
+  'Solo Parent ID',
+  '4Ps / Pantawid Pamilya ID',
+  'OFW ID / iDOLE Card',
+  'Seaman\'s Book (MARINA)',
+  'OWWA ID',
+  'BIR ID (TIN Card)',
+  'Barangay ID / Barangay Certification',
+  'School ID (for minors)',
+
+  // Other
+  'Other Government-issued ID',
+]
+
+export const RELATION_FAMHEAD = [
+  'Father', 'Mother', 'Daughter', 'Son'
+]
+
 // Must match DB CHECK constraint exactly
 export const EDUCATIONAL_ATTAINMENT = [
   'No Formal Education', 'Elementary', 'High School',
