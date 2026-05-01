@@ -9,17 +9,19 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.103.0",
+    "@supabase/supabase-js": "^2.105.1",
     "@tanstack/react-form": "^1.28.6",
     "@tanstack/react-form-nextjs": "^1.28.6",
     "@tanstack/react-form-remix": "^1.28.6",
     "@tanstack/react-form-start": "^1.28.6",
     "@tanstack/react-store": "^0.11.0",
     "@tanstack/zod-form-adapter": "^0.42.1",
+    "dotenv": "^17.4.2",
     "lucide-react": "^1.6.0",
     "next": "16.1.7",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "xlsx": "^0.18.5",
     "zod": "^3.25.76"
   },
   "devDependencies": {
@@ -31,6 +33,10 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.7",
     "tailwindcss": "^4.2.2",
+    "tsx": "^4.21.0",
     "typescript": "^5"
+  },
+  "scripts": {
+    "seed:barangays": "npx tsx scripts/seed-barangays.ts"
   }
 }

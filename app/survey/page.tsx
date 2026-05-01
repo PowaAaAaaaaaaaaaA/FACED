@@ -10,20 +10,9 @@ import { generateSerialNumber } from '../../lib/psgc'
 import { FormSchema, type FormValues, type FamilyMemberLocal, type LocationCodes } from './types'
 import { STEPS, INCOME_MAP } from './constants'
 import { StepIndicator } from './components/StepIndicator'
-import { Step1Location } from './components/Step1Location'
-import { Step2HeadOfFamily } from './components/Step2HeadOfFamily'
-import { Step3FamilyMembers } from './components/Step3FamilyMembers'
-import { Step4AccountInfo } from './components/Step4AccountInfo'
 
 export default function SurveyPage() {
-  const [step,          setStep]          = useState(1)
-  const [submitted,     setSubmitted]     = useState(false)
-  const [submitting,    setSubmitting]    = useState(false)
-  const [submitError,   setSubmitError]   = useState('')
-  const [serialNum,     setSerialNum]     = useState('')
-  const [locationCodes, setLocationCodes] = useState<LocationCodes>({
-    regionCode: '', provinceCode: '', municipalityCode: '', barangayCode: '',
-  })
+  const [step, setStep]= useState(1)
 
   const form = useForm({
     defaultValues: {
@@ -190,30 +179,7 @@ export default function SurveyPage() {
   const handleNext = () => setStep((prev) => Math.min(prev + 1, 4))
   const handleBack = () => setStep((prev) => Math.max(prev - 1, 1))
 
-  // ── Success screen ─────────────────────────────────────────────────────────
-  if (submitted) {
-    return (
-      <div className="flex flex-col min-h-screen bg-[#F4F7FB] items-center justify-center gap-6">
-        <div className="bg-white rounded-2xl shadow-lg border border-blue-100 p-12 text-center max-w-md">
-          <div className="text-6xl mb-4">✅</div>
-          <h2 className="text-2xl font-bold text-blue-900 mb-2">Form Submitted!</h2>
-          <p className="text-base-content/70 mb-2">Your FACED form has been successfully submitted.</p>
-          <div className="bg-blue-50 rounded-xl px-6 py-3 mb-6 border border-blue-100">
-            <p className="text-xs text-blue-600 mb-1">Your serial number</p>
-            <p className="text-lg font-bold font-mono text-blue-900">{serialNum}</p>
-          </div>
-          <p className="text-xs text-base-content/50 mb-6">
-            Please keep this serial number for your records. The data will be reviewed by the assigned LSWDO.
-          </p>
-          <Link href="/">
-            <button className="btn btn-primary w-full">Back to Home</button>
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  // ── Main form ──────────────────────────────────────────────────────────────
+  // MAIN FORM
   return (
     <div className="flex flex-col min-h-screen font-sans bg-white">
       <div className="w-full h-2 bg-gradient-to-r from-blue-900 via-blue-600 to-blue-400" />
@@ -245,53 +211,6 @@ export default function SurveyPage() {
               <h2 className="text-lg font-bold text-blue-900">{STEPS[step - 1].title}</h2>
             </div>
 
-            <form onSubmit={(e) => { e.preventDefault(); if (step === 4) form.handleSubmit() }}>
-              {step === 1 && (
-                <Step1Location
-                  form={form}
-                  onLocationCodesChange={setLocationCodes}
-                />
-              )}
-              {step === 2 && <Step2HeadOfFamily form={form} />}
-              {step === 3 && <Step3FamilyMembers form={form} />}
-              {step === 4 && <Step4AccountInfo form={form} />}
-
-              {submitError && (
-                <div className="alert alert-error mt-4">
-                  <span className="text-sm">{submitError}</span>
-                </div>
-              )}
-
-              <div className="flex justify-between mt-8 pt-6 border-t border-base-200">
-                <div>
-                  {step > 1 ? (
-                    <button type="button" className="btn btn-outline" onClick={handleBack}>
-                      ← Back
-                    </button>
-                  ) : (
-                    <Link href="/">
-                      <button type="button" className="btn btn-ghost text-base-content/60">
-                        ← Back to Home
-                      </button>
-                    </Link>
-                  )}
-                </div>
-                <div>
-                  {step < 4 ? (
-                    <button type="button" className="btn btn-primary" onClick={handleNext}>
-                      Next →
-                    </button>
-                  ) : (
-                    <button type="submit" className="btn btn-success text-white" disabled={submitting}>
-                      {submitting
-                        ? <><span className="loading loading-spinner loading-sm" /> Submitting...</>
-                        : 'Submit Form ✓'
-                      }
-                    </button>
-                  )}
-                </div>
-              </div>
-            </form>
           </div>
         </div>
       </main>
