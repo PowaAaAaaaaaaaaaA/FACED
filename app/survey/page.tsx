@@ -1,12 +1,12 @@
 'use client'
-
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useForm } from '@tanstack/react-form'
 import { supabase } from '@/lib/supabase'
 import { generateSerialNumber } from '../../lib/psgc'
-import { Pencil, Trash2, LucidePlus, Info } from 'lucide-react'
+import { Pencil, Trash2, LucidePlus, Info, CheckCircle, Printer } from 'lucide-react'
 
 import { STEPS, INCOME_MAP, CIVIL_STATUS_OPTIONS, SEX_OPTIONS, RELIGIONS, INCOME_BRACKETS, VALID_IDS, RELATION_FAMHEAD, EDUCATIONAL_ATTAINMENT, VULNERABILITY_TYPES, BANK_EWALLET_OPTIONS, ACCOUNT_TYPE_OPTIONS, HOUSE_OWNERSHIP, SHELTER_DMG_CLASSIFICATION } from './constants'
 import { StepIndicator } from './components/StepIndicator'
@@ -23,7 +23,7 @@ type FamilyMember = {
 }
 
 export default function SurveyPage() {
-
+  const router = useRouter();
   const [step, setStep]= useState(1)
   const [members, setMembers] = useState<FamilyMember[]>([
     { id: 1, fullName: '', relation: '', birthdate: '', age: '', sex: '', education: '', occupation: '', vulnerability: '' }
@@ -57,8 +57,15 @@ export default function SurveyPage() {
   const [selectedProvider, setSelectedProvider] = useState('')
   const isEwallet = EWALLET_NAMES.includes(selectedProvider)
 
-  const handleNext = () => setStep((prev) => Math.min(prev + 1, 4))
-  const handleBack = () => setStep((prev) => Math.max(prev - 1, 1))
+  const handleNext = () => setStep((prev) => Math.min(prev + 1, 5))
+
+  const handleBack = () => {
+    if (step === 1) {
+      router.push('/DataPrivacy')
+    } else {
+      setStep((prev) => Math.max(prev - 1, 1))
+    }
+  }
 
   // MAIN FORM
   return (
@@ -519,10 +526,80 @@ export default function SurveyPage() {
                   </div>
                 </form>
               )}
+
+              {step === 5 && (
+                <div className="flex flex-col items-center gap-6 py-4">
+
+                  {/* Success icon */}
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="bg-green-100 rounded-full p-4">
+                      <CheckCircle size={48} className="text-green-600" />
+                    </div>
+                    <h2 className="text-xl font-bold text-green-700">Registration Successful!</h2>
+                    <p className="text-sm text-slate-500">Matagumpay na naitala ang inyong pamilya.</p>
+                  </div>
+
+                  {/* Serial Number */}
+                  <div className="flex flex-col items-center gap-2 w-full">
+                    <p className="text-sm text-slate-500 font-medium">Your FACED Serial Number</p>
+                    <div className="bg-blue-50 border-2 border-blue-200 border-dashed rounded-xl px-10 py-4 text-center">
+                      <p className="text-2xl font-mono font-bold text-blue-900 tracking-widest">
+                        0306910001-00001
+                      </p>
+                    </div>
+                    <p className="text-xs text-slate-400 italic text-center">
+                      Itala o i-print ang serial number na ito. Ito ang inyong reference sa FACED system.
+                    </p>
+                  </div>
+
+                  {/* Summary */}
+                  <div className="w-full border border-blue-100 rounded-xl overflow-hidden">
+                    <div className="bg-blue-900 px-4 py-2">
+                      <p className="text-white text-sm font-semibold">Registration Summary</p>
+                    </div>
+                    <div className="divide-y divide-blue-50">
+                      {[
+                        { label: 'Full Name', value: 'Juan dela Cruz' },
+                        { label: 'Barangay', value: 'Abogado' },
+                        { label: 'Municipality', value: 'Paniqui' },
+                        { label: 'Province', value: 'Tarlac' },
+                        { label: 'Region', value: 'Region III (Central Luzon)' },
+                        { label: 'Date Registered', value: new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' }) },
+                      ].map(({ label, value }) => (
+                        <div key={label} className="flex justify-between px-4 py-2 text-sm">
+                          <span className="text-slate-500">{label}</span>
+                          <span className="font-medium text-slate-800">{value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-3 w-full">
+                    <button
+                      type="button"
+                      className="btn btn-outline btn-primary flex-1"
+                      onClick={() => window.print()}
+                    >
+                      <Printer size={16} /> Print Confirmation
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary flex-1"
+                      onClick={() => router.push('/')}
+                    >
+                      Back to Home
+                    </button>
+                  </div>
+
+                </div>
+              )}
               
-              {/* ── Navigation buttons ── always visible ── */}
+              {/* ── Navigation buttons ── */}
               <div className="flex justify-center gap-1 mt-6">
-                {step > 1 && (
+
+                {/* Back button — hide on step 5 */}
+                {step < 5 && (
                   <button
                     type="button"
                     className="btn btn-outline btn-primary"
@@ -532,7 +609,8 @@ export default function SurveyPage() {
                   </button>
                 )}
 
-                {step < 4 ? (
+                {/* Next — steps 1 to 3 */}
+                {step < 4 && (
                   <button
                     type="button"
                     className="btn btn-primary"
@@ -540,14 +618,19 @@ export default function SurveyPage() {
                   >
                     Next
                   </button>
-                ) : (
+                )}
+
+                {/* Submit — only on step 4 */}
+                {step === 4 && (
                   <button
                     type="submit"
                     className="btn btn-success"
+                    onClick={handleNext}
                   >
                     Submit
                   </button>
                 )}
+
               </div>
             </div>
 

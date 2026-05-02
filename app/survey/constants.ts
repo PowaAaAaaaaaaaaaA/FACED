@@ -3,6 +3,7 @@ export const STEPS = [
   { id: 2, title: 'Head of the Family' },
   { id: 3, title: 'Family Information' },
   { id: 4, title: 'Account Information' },
+  { id: 5, title: 'Confirmation' }
 ]
 
 export const CIVIL_STATUS_OPTIONS = [
