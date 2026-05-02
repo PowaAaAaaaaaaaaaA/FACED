@@ -22,6 +22,18 @@ type FamilyMember = {
   vulnerability: string
 }
 
+const calculateAge = (birthdate: string) => {
+  if(!birthdate) return ''
+  const today = new Date() //gets and store the year using getFullYear function below
+  const birth = new Date(birthdate) // get's the birthdate year below
+  let age = today.getFullYear() - birth.getFullYear()
+  const monthDiff = today.getMonth() - birth.getMonth()
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--
+  }
+  return String(age)
+}
+
 export default function SurveyPage() {
   const router = useRouter();
   const [step, setStep]= useState(1)
@@ -52,10 +64,6 @@ export default function SurveyPage() {
       prev.map((m) => (m.id === id ? { ...m, [field]: value } : m))
     )
   }
-
-  const EWALLET_NAMES = ['GCash', 'Maya (PayMaya)', 'ShopeePay', 'SeaBank']
-  const [selectedProvider, setSelectedProvider] = useState('')
-  const isEwallet = EWALLET_NAMES.includes(selectedProvider)
 
   const handleNext = () => setStep((prev) => Math.min(prev + 1, 5))
 
@@ -160,6 +168,68 @@ export default function SurveyPage() {
     }
     fetchBarangays()
   }, [selectedMunicipality])
+
+  //form data
+  const [formData, setFormData] = useState({
+    // Step 1 — location
+    evacuationCenter: '',
+
+    // Step 2 — family head
+    lastName: '',
+    firstName: '',
+    middleName: '',
+    nameExtension: '',
+    birthdate: '',
+    age: '',
+    birthplace: '',
+    sex: '',
+    civilStatus: '',
+    mothersMaidenName: '',
+    religion: '',
+    occupation: '',
+    monthlyFamilyNetIncome: '',
+    idCardPresented: '',
+    idCardNumber: '',
+    contactPrimary: '',
+    contactAlternate: '',
+    // permanent address
+    houseNo: '',
+    street: '',
+    subdivision: '',
+    addressBarangay: '',
+    addressMunicipality: '',
+    addressProvince: '',
+    zipCode: '',
+    // others
+    is4psBeneficiary: false,
+    isIndigenousPeople: false,
+    ipEthnicity: '',
+
+    // Step 4 — account info
+    bankEwallet: '',
+    accountName: '',
+    accountType: '',
+    accountNumber: '',
+    houseOwnership: '',
+    shelterDamage: '',
+  })
+
+  const EWALLET_NAMES = ['GCash', 'Maya (PayMaya)', 'ShopeePay', 'SeaBank']
+  const isEwallet = EWALLET_NAMES.includes(formData.bankEwallet)
+
+  const updateForm = (field: string, value: string | boolean) => {
+    setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  console.log('formData:', formData)
+  console.log('members:', members)
+  console.log('location:', {
+    selectedRegion,
+    selectedProvince,
+    selectedMunicipality,
+    selectedDistrict,
+    selectedBarangay,
+  })
 
   // MAIN FORM
   return (
@@ -291,6 +361,8 @@ export default function SurveyPage() {
                         type="text"
                         className="input input-primary w-full"
                         placeholder="Enter evacuation center or site"
+                        value={formData.evacuationCenter} 
+                        onChange={(e) => updateForm('evacuationCenter', e.target.value)}
                       />
                     </div>
 
@@ -305,29 +377,77 @@ export default function SurveyPage() {
                     {/* left side */}
                     <div className="flex flex-col gap-1">
                       <legend className="fieldset-legend">Last Name</legend>
-                      <input type="text" className="input input-primary w-full" placeholder="Last Name" />
+                      <input 
+                        type="text" 
+                        className="input input-primary w-full" placeholder="Last Name" 
+                        value={formData.lastName} 
+                        onChange={(e) => updateForm('lastName', e.target.value)}
+                      />
 
                       <legend className="fieldset-legend">First Name</legend>
-                      <input type="text" className="input input-primary w-full" placeholder="First Name" />
+                      <input 
+                        type="text"
+                        className="input input-primary w-full" 
+                        placeholder="First Name"
+                        value={formData.firstName} 
+                        onChange={(e) => updateForm('firstName', e.target.value)} 
+                      />
 
                       <legend className="fieldset-legend">Middle Name</legend>
-                      <input type="text" className="input input-primary w-full" placeholder="Middle Name" />
+                      <input 
+                        type="text" 
+                        className="input input-primary w-full" 
+                        placeholder="Middle Name" 
+                        value={formData.middleName} 
+                        onChange={(e) => updateForm('middleName', e.target.value)} 
+                      />
 
                       <legend className="fieldset-legend">Name Extension</legend>
-                      <input type="text" className="input input-primary w-full" placeholder="Name Extension" />
+                      <input 
+                        type="text" 
+                        className="input input-primary 
+                        w-full" 
+                        placeholder="Name Extension" 
+                        value={formData.nameExtension} 
+                        onChange={(e) => updateForm('nameExtension', e.target.value)}   
+                      />
 
                       <legend className="fieldset-legend">Birthdate</legend>
-                      <input type="date" className="input input-primary w-full" />
+                      <input
+                        type="date"
+                        className="input input-primary w-full"
+                        value={formData.birthdate}
+                        onChange={(e) => {
+                          updateForm('birthdate', e.target.value)
+                          updateForm('age', calculateAge(e.target.value))
+                        }}
+                      />
 
                       <legend className="fieldset-legend">Age</legend>
-                      <input type="text" className="input input-primary w-full" placeholder="Age" />
+                      <input
+                        type="text"
+                        className="input input-primary w-full bg-blue-50 opacity-100"
+                        placeholder="Auto-calculated"
+                        value={formData.age}
+                        readOnly
+                      />
 
                       <legend className="fieldset-legend">Birthplace</legend>
-                      <input type="text" className="input input-primary w-full" placeholder="Birthplace" />
+                      <input 
+                        type="text"
+                        className="input input-primary w-full" 
+                        placeholder="Birthplace"
+                        value={formData.birthplace} 
+                        onChange={(e) => updateForm('birthplace', e.target.value)}  
+                      />
 
                       <legend className="fieldset-legend">Sex</legend>
-                      <select className="select select-primary w-full">
-                        <option disabled>--Select--</option>
+                      <select 
+                        className="select select-primary w-full"
+                        value={formData.sex} 
+                        onChange={(e) => updateForm('sex', e.target.value)} 
+                      >
+                        <option disabled value=''>--Select--</option>
                         {SEX_OPTIONS.map((opt) => (
                           <option key={opt} value={opt}>{opt}</option>
                         ))}
@@ -337,51 +457,119 @@ export default function SurveyPage() {
                     {/* right side */}
                     <div className="flex flex-col gap-1">
                       <legend className="fieldset-legend">Civil Status</legend>
-                      <select className="select select-primary w-full">
-                        <option disabled>--Select Status--</option>
+                      <select 
+                        className="select select-primary w-full"
+                        value={formData.civilStatus} 
+                        onChange={(e) => updateForm('civilStatus', e.target.value)} 
+                      >
+                        <option disabled value=''>--Select Status--</option>
                         {CIVIL_STATUS_OPTIONS.map((status) => (
                           <option key={status} value={status}>{status}</option>
                         ))}
                       </select>
 
                       <legend className="fieldset-legend">Mother&apos;s Maiden Name</legend>
-                      <input type="text" className="input input-primary w-full" placeholder="Mother&apos;s Maiden Name" />
+                      <input 
+                        type="text" 
+                        className="input input-primary w-full" 
+                        placeholder="Mother&apos;s Maiden Name" 
+                        value={formData.mothersMaidenName} 
+                        onChange={(e) => updateForm('mothersMaidenName', e.target.value)}   
+                      />
 
                       <legend className="fieldset-legend">Religion</legend>
-                      <select className='select select-primary w-full'>
-                        <option disabled>--Select Religion--</option>
+                      <select 
+                        className='select select-primary w-full'
+                        value={formData.religion} 
+                        onChange={(e) => updateForm('religion', e.target.value)} 
+                      >
+                        <option disabled value=''>--Select Religion--</option>
                         {RELIGIONS.map((religion) => (
                           <option key={religion} value={religion}>{religion}</option>
                         ))}
                       </select>
 
                       <legend className="fieldset-legend">Occupation</legend>
-                      <input type="text" className="input input-primary w-full" placeholder="Occupation" />
+                      <input 
+                        type="text" 
+                        className="input input-primary w-full" 
+                        placeholder="Occupation" 
+                        value={formData.occupation} 
+                        onChange={(e) => updateForm('occupation', e.target.value)} 
+                      />
 
                       <legend className="fieldset-legend">Monthly Family Net Income</legend>
-                      <select className='select select-primary w-full'>
-                        <option disabled>--Select Income Bracket</option>
+                      <select 
+                        className='select select-primary w-full'
+                        value={formData.monthlyFamilyNetIncome} 
+                        onChange={(e) => updateForm('monthlyFamilyNetIncome', e.target.value)} 
+                      >
+                        <option disabled value=''>--Select Income Bracket</option>
                         {INCOME_BRACKETS.map((income) => (
                           <option key={income} value={income}>{income}</option>
                         ))}
                       </select>
 
                       <legend className="fieldset-legend">ID Card Presented</legend>
-                      <select className='select select-primary w-full'>
-                        <option disabled>--Select ID--</option>
+                      <select 
+                        className='select select-primary w-full'
+                        value={formData.idCardPresented} 
+                        onChange={(e) => updateForm('idCardPresented', e.target.value)} 
+                      >
+                        <option disabled value=''>--Select ID--</option>
                         {VALID_IDS.map((validID) => (
                           <option key={validID} value={validID}>{validID}</option>
                         ))}
                       </select>
 
                       <legend className="fieldset-legend">ID Card Number</legend>
-                      <input type="text" className="input input-primary w-full" placeholder="ID Card Number" />
+                      <input 
+                        type="text" 
+                        className="input input-primary w-full" 
+                        placeholder="ID Card Number" 
+                        value={formData.idCardNumber} 
+                        onChange={(e) => updateForm('idCardNumber', e.target.value)} 
+                      />
 
                       <legend className="fieldset-legend">Contact Number</legend>
                       <div className='flex flex-row w-full'>
-                        <input type="text" className="input input-primary w-full" placeholder="Primary Contact Number" />
+                        <input
+                          type="text"
+                          inputMode="tel"
+                          maxLength={13} // allow +63XXXXXXXXXX which is 13 chars
+                          className="input input-primary w-full"
+                          placeholder="e.g. 09171234567 or +639171234567"
+                          value={formData.contactPrimary}
+                          onChange={(e) => {
+                            let value = e.target.value.trim()
+
+                            // Normalize +63 to 0
+                            if (value.startsWith('+63')) {
+                              value = '0' + value.slice(3)
+                            }
+
+                            // Remove anything that's not a digit
+                            value = value.replace(/\D/g, '')
+
+                            // Limit to 11 digits
+                            if (value.length <= 11) updateForm('contactPrimary', value)
+                          }}
+                        />
                         <div className="divider divider-secondary divider-horizontal"></div>
-                        <input type="text" className="input input-primary" placeholder="Alternative Contact Number w-full" />
+                        <input
+                          type="text"
+                          inputMode="tel"
+                          maxLength={13}
+                          className="input input-primary w-full"
+                          placeholder="e.g. 09171234567 or +639171234567"
+                          value={formData.contactAlternate}
+                          onChange={(e) => {
+                            let value = e.target.value.trim()
+                            if (value.startsWith('+63')) value = '0' + value.slice(3)
+                            value = value.replace(/\D/g, '')
+                            if (value.length <= 11) updateForm('contactAlternate', value)
+                          }}
+                        />
                       </div>
                     </div> 
                   </div>
@@ -391,17 +579,70 @@ export default function SurveyPage() {
                   <legend className="fieldset-legend max-w-full">Permanent Address</legend>
                   <div className='grid grid-cols-2 gap-x-6 gap-y-4'>
                     <div className="flex flex-col gap-1">
+                      <input 
+                        type="text" 
+                        className="input input-primary w-full" 
+                        placeholder="House/Block/Lot No." 
+                        value={formData.houseNo} 
+                        onChange={(e) => updateForm('houseNo', e.target.value)}
+                      />
 
-                      <input type="text" className="input input-primary w-full" placeholder="House/Block/Lot No." />
-                      <input type="text" className="input input-primary w-full" placeholder="Street" />
-                      <input type="text" className="input input-primary w-full" placeholder="Sub./Village" />
-                      <input type="text" className="input input-primary w-full" placeholder="Barangay" />
+                      <input 
+                        type="text" 
+                        className="input input-primary w-full" 
+                        placeholder="Street" 
+                        value={formData.street} 
+                        onChange={(e) => updateForm('street', e.target.value)}
+                      />
+
+                      <input 
+                        type="text" 
+                        className="input input-primary w-full" 
+                        placeholder="Sub./Village" 
+                        value={formData.subdivision} 
+                        onChange={(e) => updateForm('subdivision', e.target.value)}
+                      />
+
+                      <input 
+                        type="text" 
+                        className="input input-primary w-full" 
+                        placeholder="Barangay" 
+                        value={formData.addressBarangay} 
+                        onChange={(e) => updateForm('addressBarangay', e.target.value)}
+                      />
+
                     </div>
 
                     <div className="flex flex-col gap-1">
-                      <input type="text" className="input input-primary w-full" placeholder="City/Municipality" />
-                      <input type="text" className="input input-primary w-full" placeholder="Province" />
-                      <input type="text" className="input input-primary w-full" placeholder="Zip Code" />
+                      <input 
+                        type="text" 
+                        className="input input-primary w-full" 
+                        placeholder="City/Municipality" 
+                        value={formData.addressMunicipality} 
+                        onChange={(e) => updateForm('addressMunicipality', e.target.value)}
+                      />
+
+                      <input 
+                        type="text" 
+                        className="input input-primary w-full" 
+                        placeholder="Province" 
+                        value={formData.addressProvince} 
+                        onChange={(e) => updateForm('addressProvince', e.target.value)}
+                      />
+
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={4}
+                        className="input input-primary w-full"
+                        placeholder="Zip Code"
+                        value={formData.zipCode}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '')
+                          if (value.length <= 4) updateForm('zipCode', value)
+                        }}
+                      />
                     </div>
                   </div>
 
@@ -414,6 +655,8 @@ export default function SurveyPage() {
                       <input
                         type="checkbox"
                         className="checkbox checkbox-primary"
+                        checked={formData.is4psBeneficiary}
+                        onChange={(e) => updateForm('is4psBeneficiary', e.target.checked)}
                       />
                       <span className="text-sm">4Ps Beneficiary</span>
                     </label>
@@ -423,19 +666,25 @@ export default function SurveyPage() {
                       <input
                         type="checkbox"
                         className="checkbox checkbox-primary"
+                        checked={formData.isIndigenousPeople}
+                        onChange={(e) => updateForm('isIndigenousPeople', e.target.checked)}
                       />
                       <span className="text-sm">Indigenous People (IP)</span>
                     </label>
 
-                    {/* Type of Ethnicity — only shows if IP is checked */}
-                    <div className="flex flex-col gap-1 ml-7">
-                      <label className="fieldset-legend">Type of Ethnicity</label>
-                      <input
-                        type="text"
-                        className="input input-primary w-full"
-                        placeholder="e.g. Igorot, Aeta, Mangyan"
-                      />
-                    </div>
+                    {/* Only shows if IP is checked */}
+                    {formData.isIndigenousPeople && (
+                      <div className="flex flex-col gap-1 ml-7">
+                        <label className="fieldset-legend">Type of Ethnicity</label>
+                        <input
+                          type="text"
+                          className="input input-primary w-full"
+                          placeholder="e.g. Igorot, Aeta, Mangyan"
+                          value={formData.ipEthnicity}
+                          onChange={(e) => updateForm('ipEthnicity', e.target.value)}
+                        />
+                      </div>
+                    )}
                   </div>
                 </form>
               )}
@@ -484,22 +733,23 @@ export default function SurveyPage() {
                               </select>
                             </td>
                             <td>
-                              <input 
-                                type="date" 
+                              <input
+                                type="date"
                                 className="input input-primary w-full input-sm"
-                                value={member.birthdate} 
-                                onChange={(e) => updateMember(member.id, 'birthdate', e.target.value)}
+                                value={member.birthdate}
+                                onChange={(e) => {
+                                  updateMember(member.id, 'birthdate', e.target.value)
+                                  updateMember(member.id, 'age', calculateAge(e.target.value))
+                                }}
                               />
                             </td>
                             <td>
                               <input
-                                type="number"
-                                className="input input-primary input-sm w-full"
-                                min="0"
-                                max="120"
-                                placeholder="Age"
+                                type="text"
+                                className="input input-primary input-sm w-full bg-blue-50 opacity-100 cursor-default"
+                                placeholder="Auto"
                                 value={member.age}
-                                onChange={(e) => updateMember(member.id, 'age', e.target.value)}
+                                readOnly
                               />
                             </td>
                             <td>
@@ -596,8 +846,8 @@ export default function SurveyPage() {
                       <legend className="fieldset-legend">Bank/E-wallet</legend>
                       <select
                         className="select select-primary w-full"
-                        value={selectedProvider}
-                        onChange={(e) => setSelectedProvider(e.target.value)}
+                        value={formData.bankEwallet}
+                        onChange={(e) => updateForm('bankEwallet', e.target.value)}
                       >
                         <option disabled value="">--Select Bank / E-Wallet--</option>
                         {BANK_EWALLET_OPTIONS.map((provider) => (
@@ -606,15 +856,25 @@ export default function SurveyPage() {
                       </select>
 
                       <legend className="fieldset-legend">Account Name</legend>
-                      <input type="text" className="input input-primary w-full" placeholder="Account Name" />
+                      <input 
+                        type="text" 
+                        className="input input-primary w-full" 
+                        placeholder="Account Name" 
+                        value={formData.accountName}
+                        onChange={(e) => updateForm('accountName', e.target.value)}  
+                      />
 
                     </div>
 
                     {/* right side */}
                     <div className="flex flex-col gap-1">
                       <label className="fieldset-legend">Account Type</label>
-                        <select className="select select-primary w-full">
-                          <option disabled>--Select--</option>
+                        <select 
+                          className="select select-primary w-full"
+                          value={formData.accountType}
+                          onChange={(e) => updateForm('accountType', e.target.value)}
+                        >
+                          <option disabled value=''>--Select--</option>
                           {isEwallet
                             ? <option value="e_wallet">E-Wallet</option>
                             : ACCOUNT_TYPE_OPTIONS.filter(t => t !== 'E-Wallet').map((type) => (
@@ -624,7 +884,13 @@ export default function SurveyPage() {
                       </select>
 
                       <legend className="fieldset-legend">Account Number</legend>
-                      <input type="text" className="input input-primary w-full" placeholder="Account Number" />
+                      <input 
+                        type="text" 
+                        className="input input-primary w-full" 
+                        placeholder="Account Number" 
+                        value={formData.accountNumber}
+                        onChange={(e) => updateForm('accountNumber', e.target.value)}
+                      />
                     </div> 
                   </div>
 
@@ -634,31 +900,35 @@ export default function SurveyPage() {
                     <div className="flex flex-col gap-1">
                       <legend className="fieldset-legend max-w-full">House Ownership</legend>
                       {HOUSE_OWNERSHIP.map((ownership) => (
-                        <label key={ownership} className='flex items-center gap-3 cursor-pointer'>
-                          <input 
-                            type="radio" 
-                            name="HOUSE_OWNERSHIP" 
-                            className="radio radio-primary" 
+                        <label key={ownership} className="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="HOUSE_OWNERSHIP"
+                            className="radio radio-primary"
                             value={ownership}
+                            checked={formData.houseOwnership === ownership}
+                            onChange={(e) => updateForm('houseOwnership', e.target.value)}
                           />
-                            <span className='text-sm'>{ownership}</span>
+                          <span className="text-sm">{ownership}</span>
                         </label>
-                      ))}       
+                      ))}
                     </div>
 
                     <div className="flex flex-col gap-1">
                       <legend className="fieldset-legend max-w-full">Shelter Damage Classification</legend>
                       {SHELTER_DMG_CLASSIFICATION.map((shelter) => (
-                        <label key={shelter} className='flex items-center gap-3 cursor-pointer'>
-                          <input 
-                            type="radio" 
-                            name="shelter_dmg" 
-                            className="radio radio-primary" 
+                        <label key={shelter} className="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="shelter_dmg"
+                            className="radio radio-primary"
                             value={shelter}
+                            checked={formData.shelterDamage === shelter}
+                            onChange={(e) => updateForm('shelterDamage', e.target.value)}
                           />
-                            <span className='text-sm'>{shelter}</span>
+                          <span className="text-sm">{shelter}</span>
                         </label>
-                      ))}    
+                      ))} 
                     </div>
                   </div>
                 </form>
