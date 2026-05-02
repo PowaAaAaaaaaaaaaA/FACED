@@ -6,14 +6,56 @@ import Image from 'next/image'
 import { useForm } from '@tanstack/react-form'
 import { supabase } from '@/lib/supabase'
 import { generateSerialNumber } from '../../lib/psgc'
-import { Pencil, Trash2 } from 'lucide-react'
-import { FormSchema, type FormValues, type FamilyMemberLocal, type LocationCodes } from './types'
-import { STEPS, INCOME_MAP, CIVIL_STATUS_OPTIONS, SEX_OPTIONS, RELIGIONS, INCOME_BRACKETS, VALID_IDS, RELATION_FAMHEAD, EDUCATIONAL_ATTAINMENT, VULNERABILITY_TYPES } from './constants'
+import { Pencil, Trash2, LucidePlus, Info } from 'lucide-react'
+
+import { STEPS, INCOME_MAP, CIVIL_STATUS_OPTIONS, SEX_OPTIONS, RELIGIONS, INCOME_BRACKETS, VALID_IDS, RELATION_FAMHEAD, EDUCATIONAL_ATTAINMENT, VULNERABILITY_TYPES, BANK_EWALLET_OPTIONS, ACCOUNT_TYPE_OPTIONS, HOUSE_OWNERSHIP, SHELTER_DMG_CLASSIFICATION } from './constants'
 import { StepIndicator } from './components/StepIndicator'
+type FamilyMember = {
+  id:number
+  fullName:string
+  relation: string
+  birthdate: string
+  age: string
+  sex: string
+  education: string
+  occupation: string
+  vulnerability: string
+}
 
 export default function SurveyPage() {
 
   const [step, setStep]= useState(1)
+  const [members, setMembers] = useState<FamilyMember[]>([
+    { id: 1, fullName: '', relation: '', birthdate: '', age: '', sex: '', education: '', occupation: '', vulnerability: '' }
+  ])
+
+  const addMember = () => {
+    setMembers((prev) => [
+      ...prev,
+      {
+        id: Date.now(), fullName: '', relation: '', birthdate: '', age: '', sex: '', education: '', occupation: '', vulnerability: ''
+      }
+    ])
+    console.log('Added member')
+  }
+
+  const deleteMember = (id: number) => {
+    // Don't allow deleting the last row
+    if (members.length === 1) return
+    setMembers((prev) => prev.filter((m) => m.id !== id))
+    console.log('Deleted member')
+  }
+
+  // Update a specific field in a specific row
+  const updateMember = (id: number, field: keyof FamilyMember, value: string) => {
+    setMembers((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, [field]: value } : m))
+    )
+  }
+
+  const EWALLET_NAMES = ['GCash', 'Maya (PayMaya)', 'ShopeePay', 'SeaBank']
+  const [selectedProvider, setSelectedProvider] = useState('')
+  const isEwallet = EWALLET_NAMES.includes(selectedProvider)
 
   const handleNext = () => setStep((prev) => Math.min(prev + 1, 4))
   const handleBack = () => setStep((prev) => Math.max(prev - 1, 1))
@@ -274,76 +316,119 @@ export default function SurveyPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {/* row 1 */}
-                        <tr>
-                          <td>
-                            <input type="text" className="input input-primary w-full input-sm" placeholder="Full Name" />
-                          </td>
-                          <td>
-                            <select className='select select-primary w-full select-sm'>
-                              <option disabled>--Select Relation--</option>
-                              {RELATION_FAMHEAD.map((rel) => (
-                                <option key={rel} value={rel}>{rel}</option>
-                              ))}
-                            </select>
-                          </td>
-                          <td>
-                            <input type="date" className="input input-primary w-full input-sm" />
-                          </td>
-                          <td>
-                            <input
-                              type="number"
-                              className="input input-primary input-sm w-full"
-                              min="0"
-                              max="120"
-                              placeholder="Age"
-                            />
-                          </td>
-                          <td>
-                            <select className='select select-primary w-full select-sm'>
-                              <option disabled>--Select--</option>
-                              {SEX_OPTIONS.map((option) => (
-                                <option key={option} value={option}>{option}</option>
-                              ))}
-                            </select>
-                          </td>
-                          <td>
-                            <select className='select select-primary w-full select-sm'>
-                              <option disabled>--Select--</option>
-                              {EDUCATIONAL_ATTAINMENT.map((educ) => (
-                                <option key={educ} value={educ}>{educ}</option>
-                              ))}
-                            </select>
-                          </td>
-                          <td>
-                            <input type="text" className="input input-primary w-full input-sm" placeholder="Occupation" />
-                          </td>
-                          <td>
-                            <select className='select select-primary w-full select-sm'>
-                              <option disabled>--Select--</option>
-                              {VULNERABILITY_TYPES.map((vulnerability) => (
-                                <option key={vulnerability} value={vulnerability}>{vulnerability}</option>
-                              ))}
-                            </select>
-                          </td>
-                          <td>
-                            <div className="flex gap-1">
-                              <button type="button" className="btn btn-square btn-sm btn-ghost text-blue-600">
-                                <Pencil size={16} />
-                              </button>
-                              <button type="button" className="btn btn-square btn-sm btn-ghost text-red-500">
+                        {members.map((member)=>(
+                          <tr key={member.id}>
+                            <td>
+                              <input 
+                                type="text" 
+                                className="input input-primary w-full input-sm"
+                                placeholder="Full Name"
+                                value={member.fullName}
+                                onChange={(e) => updateMember(member.id, 'fullName', e.target.value)}
+                              />
+                            </td>
+                            <td>
+                              <select 
+                                className='select select-primary w-full select-sm'
+                                value={member.relation}
+                                onChange={(e) => updateMember(member.id, 'relation', e.target.value)}
+                              >
+                                <option disabled>--Select Relation--</option>
+                                {RELATION_FAMHEAD.map((rel) => (
+                                  <option key={rel} value={rel}>{rel}</option>
+                                ))}
+                              </select>
+                            </td>
+                            <td>
+                              <input 
+                                type="date" 
+                                className="input input-primary w-full input-sm"
+                                value={member.birthdate} 
+                                onChange={(e) => updateMember(member.id, 'birthdate', e.target.value)}
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="number"
+                                className="input input-primary input-sm w-full"
+                                min="0"
+                                max="120"
+                                placeholder="Age"
+                                value={member.age}
+                                onChange={(e) => updateMember(member.id, 'age', e.target.value)}
+                              />
+                            </td>
+                            <td>
+                              <select 
+                                className='select select-primary w-full select-sm'
+                                value={member.sex}
+                                onChange={(e) => updateMember(member.id, 'sex', e.target.value)}  
+                              >
+                                <option disabled>--Select--</option>
+                                {SEX_OPTIONS.map((option) => (
+                                  <option key={option} value={option}>{option}</option>
+                                ))}
+                              </select>
+                            </td>
+                            <td>
+                              <select
+                                className='select select-primary w-full select-sm'
+                                value={member.education}
+                                onChange={(e) => updateMember(member.id, 'education', e.target.value)}
+                              >
+                                <option disabled>--Select--</option>
+                                {EDUCATIONAL_ATTAINMENT.map((educ) => (
+                                  <option key={educ} value={educ}>{educ}</option>
+                                ))}
+                              </select>
+                            </td>
+                            <td>
+                              <input 
+                                type="text" 
+                                className="input input-primary w-full input-sm"
+                                placeholder="Occupation" 
+                                value={member.occupation}
+                                onChange={(e) => updateMember(member.id, 'occupation', e.target.value)}
+                              />
+                            </td>
+                            <td>
+                              <select 
+                                className='select select-primary w-full select-sm'
+                                value={member.vulnerability}
+                                onChange={(e) => updateMember(member.id, 'vulnerability', e.target.value)}
+                              >
+                                <option disabled>--Select--</option>
+                                {VULNERABILITY_TYPES.map((v) => (
+                                  <option key={v} value={v}>{v}</option>
+                                ))}
+                              </select>
+                            </td>
+                            <td>
+                              <button
+                                type="button"
+                                className="btn btn-square btn-sm btn-ghost text-red-500"
+                                onClick={() => deleteMember(member.id)}
+                                disabled={members.length === 1}
+                                title={members.length === 1 ? "At least one member required" : "Remove"}
+                              >
                                 <Trash2 size={16} />
                               </button>
-                            </div>
-                          </td>
-                        </tr>
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
 
                   {/* adds nnew row to the table */}
                   <div className='flex justify-center'>
-                    <button className="btn btn-soft btn-primary btn-sm">Add Family Member</button>
+                    <button 
+                      type='button'
+                      className="btn btn-soft btn-primary btn-sm"
+                      onClick={addMember}
+                    >
+                      <LucidePlus size={16}/> Add Family Member
+                    </button>
                   </div>
                   
                     
@@ -352,7 +437,87 @@ export default function SurveyPage() {
 
               {/* step 4 */}
               {step === 4 && (
-                <p>family members</p>
+                <form>
+                  <div className="card card-xs shadow-sm w-full bg-yellow-200">
+                    <div className="card-body">
+                      <h2 className="card-title text-md">
+                        <Info size={16}/>Notice
+                      </h2>
+                      <p className='text-xs font-bold'>In case the family head does not have a bank or an e-wallet account, any of the family members with a validated account can be indicated.</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                    {/* left side */}
+                    <div className="flex flex-col gap-1">
+                      <legend className="fieldset-legend">Bank/E-wallet</legend>
+                      <select
+                        className="select select-primary w-full"
+                        value={selectedProvider}
+                        onChange={(e) => setSelectedProvider(e.target.value)}
+                      >
+                        <option disabled value="">--Select Bank / E-Wallet--</option>
+                        {BANK_EWALLET_OPTIONS.map((provider) => (
+                          <option key={provider} value={provider}>{provider}</option>
+                        ))}
+                      </select>
+
+                      <legend className="fieldset-legend">Account Name</legend>
+                      <input type="text" className="input input-primary w-full" placeholder="Account Name" />
+
+                    </div>
+
+                    {/* right side */}
+                    <div className="flex flex-col gap-1">
+                      <label className="fieldset-legend">Account Type</label>
+                        <select className="select select-primary w-full">
+                          <option disabled>--Select--</option>
+                          {isEwallet
+                            ? <option value="e_wallet">E-Wallet</option>
+                            : ACCOUNT_TYPE_OPTIONS.filter(t => t !== 'E-Wallet').map((type) => (
+                                <option key={type} value={type}>{type}</option>
+                              ))
+                          }
+                      </select>
+
+                      <legend className="fieldset-legend">Account Number</legend>
+                      <input type="text" className="input input-primary w-full" placeholder="Account Number" />
+                    </div> 
+                  </div>
+
+                  {/* bottom */}
+                  {/* house ownership */}
+                  <div className='grid grid-cols-2 gap-x-6 gap-y-4'>
+                    <div className="flex flex-col gap-1">
+                      <legend className="fieldset-legend max-w-full">House Ownership</legend>
+                      {HOUSE_OWNERSHIP.map((ownership) => (
+                        <label key={ownership} className='flex items-center gap-3 cursor-pointer'>
+                          <input 
+                            type="radio" 
+                            name="HOUSE_OWNERSHIP" 
+                            className="radio radio-primary" 
+                            value={ownership}
+                          />
+                            <span className='text-sm'>{ownership}</span>
+                        </label>
+                      ))}       
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <legend className="fieldset-legend max-w-full">Shelter Damage Classification</legend>
+                      {SHELTER_DMG_CLASSIFICATION.map((shelter) => (
+                        <label key={shelter} className='flex items-center gap-3 cursor-pointer'>
+                          <input 
+                            type="radio" 
+                            name="shelter_dmg" 
+                            className="radio radio-primary" 
+                            value={shelter}
+                          />
+                            <span className='text-sm'>{shelter}</span>
+                        </label>
+                      ))}    
+                    </div>
+                  </div>
+                </form>
               )}
               
               {/* ── Navigation buttons ── always visible ── */}

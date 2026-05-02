@@ -109,3 +109,20 @@ export const BANK_EWALLET_OPTIONS = [
   'GCash', 'Maya (PayMaya)', 'BDO', 'BPI', 'Metrobank',
   'UnionBank', 'Landbank', 'DBP', 'RCBC', 'PNB', 'SeaBank', 'ShopeePay', 'Others',
 ]
+
+export const ACCOUNT_TYPE_OPTIONS = [
+  'Savings',
+  'Current',
+  'E-Wallet',
+]
+
+export const HOUSE_OWNERSHIP = [
+  'Owner',
+  'Renter',
+  'Sharer'
+]
+
+export const SHELTER_DMG_CLASSIFICATION = [
+  'Partially Damaged',
+  'Totally Damaged'
+]
