@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useForm } from '@tanstack/react-form'
@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase'
 import { generateSerialNumber } from '../../lib/psgc'
 import { Pencil, Trash2, LucidePlus, Info, CheckCircle, Printer } from 'lucide-react'
 
-import { STEPS, INCOME_MAP, CIVIL_STATUS_OPTIONS, SEX_OPTIONS, RELIGIONS, INCOME_BRACKETS, VALID_IDS, RELATION_FAMHEAD, EDUCATIONAL_ATTAINMENT, VULNERABILITY_TYPES, BANK_EWALLET_OPTIONS, ACCOUNT_TYPE_OPTIONS, HOUSE_OWNERSHIP, SHELTER_DMG_CLASSIFICATION } from './constants'
+import { STEPS, INCOME_MAP, CIVIL_STATUS_OPTIONS, SEX_OPTIONS, RELIGIONS, INCOME_BRACKETS, VALID_IDS, RELATION_FAMHEAD, EDUCATIONAL_ATTAINMENT, VULNERABILITY_TYPES, BANK_EWALLET_OPTIONS, ACCOUNT_TYPE_OPTIONS, HOUSE_OWNERSHIP, SHELTER_DMG_CLASSIFICATION, PROVINCE_DISTRICTS, MUNICIPALITY_DISTRICT } from './constants'
 import { StepIndicator } from './components/StepIndicator'
 type FamilyMember = {
   id:number
@@ -67,6 +67,100 @@ export default function SurveyPage() {
     }
   }
 
+  //for step 1
+  const [selectedRegion, setSelectedRegion] = useState('')
+  const [selectedProvince, setSelectedProvince] = useState('')
+  const [selectedMunicipality, setSelectedMunicipality] = useState('')
+  const [selectedBarangay, setSelectedBarangay] = useState('')
+
+  //fetched lists
+  const [regions, setRegions] = useState<{code: string, name: string}[]>([])
+  const [provinces, setProvinces] = useState<{code: string, name: string}[]>([])
+  const [municipalities, setMunicipalities] = useState<{
+    code: string
+    name: string
+    district: string | null
+  }[]>([])
+  const [barangays, setBarangays] = useState<{code: string, name: string}[]>([])
+
+  useEffect(() => {
+    const fetchRegions = async () => {
+      const {data, error} = await supabase
+        .from('psgc_regions')
+        .select('code, name')
+        .order('name')
+      if (error) console.error(error)
+      else setRegions(data ?? [])
+    }
+    fetchRegions()
+  }, [])
+
+  useEffect(() => {
+    if(!selectedRegion) return
+
+    const fetchProvinces = async () => {
+      setProvinces([])       // clear old list
+      setMunicipalities([])  // clear downstream lists too
+      setBarangays([])
+      setSelectedProvince('')
+      setSelectedMunicipality('')
+      setSelectedBarangay('')
+
+      const {data, error} = await supabase
+        .from('psgc_provinces')
+        .select('code, name')
+        .eq('region_code', selectedRegion)
+        .order('name')
+      if (error) console.error(error)
+      else setProvinces(data ?? [])
+    }
+    fetchProvinces()
+  }, [selectedRegion])
+
+  useEffect(() => {
+    if (!selectedProvince) return
+
+    const fetchMunicipalities = async () => {
+      setMunicipalities([])
+      setBarangays([])
+      setSelectedMunicipality('')
+      setSelectedBarangay('')
+
+      const { data, error } = await supabase
+        .from('psgc_municipalities')
+        .select('code, name, district')
+        .eq('province_code', selectedProvince)
+        .order('name')
+      if (error) console.error(error)
+      else setMunicipalities(data ?? [])
+    }
+    fetchMunicipalities()
+  }, [selectedProvince])
+
+  const availableDistricts = selectedProvince 
+  ? (PROVINCE_DISTRICTS[selectedProvince] ?? []) 
+  : []
+
+  const selectedDistrict = municipalities.find(m => m.code === selectedMunicipality)?.district ?? ''
+
+  useEffect(() => {
+  if (!selectedMunicipality) return
+
+    const fetchBarangays = async () => {
+      setBarangays([])
+      setSelectedBarangay('')
+
+      const { data, error } = await supabase
+        .from('psgc_barangays')
+        .select('code, name')
+        .eq('municipality_code', selectedMunicipality)
+        .order('name')
+      if (error) console.error(error)
+      else setBarangays(data ?? [])
+    }
+    fetchBarangays()
+  }, [selectedMunicipality])
+
   // MAIN FORM
   return (
     <div className="flex flex-col min-h-screen font-sans bg-white">
@@ -105,45 +199,88 @@ export default function SurveyPage() {
                     {/* Region */}
                     <div className="flex flex-col gap-1">
                       <label className="fieldset-legend">Region</label>
-                      <select className="select select-primary w-full">
-                        <option disabled>Select Region</option>
-                        <option>Region III</option>
+                      <select 
+                        className="select select-primary w-full"
+                        value={selectedRegion}
+                        onChange={(e) => setSelectedRegion(e.target.value)}
+                      >
+                        <option disabled value="">Select Region</option>
+                        {regions.map((r) => (
+                          <option key={r.code} value={r.code}>{r.name}</option>
+                        ))}
                       </select>
                     </div>
 
                     {/* Province */}
                     <div className="flex flex-col gap-1">
                       <label className="fieldset-legend">Province</label>
-                      <select className="select select-primary w-full">
-                        <option disabled>Select Province</option>
-                        <option>Tarlac</option>
+                      <select
+                        className="select select-primary w-full"
+                        value={selectedProvince}
+                        onChange={(e) => setSelectedProvince(e.target.value)}
+                        disabled={provinces.length === 0}
+                      >
+                        <option disabled value="">Select Province</option>
+                        {provinces.map((p) => (
+                          <option key={p.code} value={p.code}>{p.name}</option>
+                        ))}
                       </select>
                     </div>
 
                     {/* City/Municipality */}
                     <div className="flex flex-col gap-1">
                       <label className="fieldset-legend">City / Municipality</label>
-                      <select className="select select-primary w-full">
-                        <option disabled>Select City/Municipality</option>
-                        <option>Paniqui</option>
+                      <select
+                        className="select select-primary w-full"
+                        value={selectedMunicipality}
+                        onChange={(e) => setSelectedMunicipality(e.target.value)}
+                        disabled={municipalities.length === 0}
+                      >
+                        <option disabled value="">Select City/Municipality</option>
+                        {municipalities.map((m) => (
+                          <option key={m.code} value={m.code}>{m.name}</option>
+                        ))}
                       </select>
                     </div>
 
                     {/* District */}
                     <div className="flex flex-col gap-1">
-                      <label className="fieldset-legend">District</label>
-                      <select className="select select-primary w-full">
-                        <option disabled>Select District</option>
-                        <option>1st District</option>
+                      <label className="fieldset-legend flex items-center gap-1">
+                        District
+                        <div className="tooltip tooltip-right" data-tip="Auto-filled based on your municipality">
+                          <Info size={14} className="text-blue-400 cursor-help" />
+                        </div>
+                      </label>
+                      <select
+                        className="select select-primary w-full bg-blue-50 text-blue-900 opacity-100 cursor-default"
+                        value={selectedDistrict}
+                        disabled
+                      >
+                        <option value="">— select municipality first —</option>
+                        {availableDistricts.map((d) => (
+                          <option key={d} value={d}>{d}</option>
+                        ))}
                       </select>
+                      {selectedDistrict && (
+                        <p className="text-xs text-blue-400 flex items-center gap-1">
+                          <Info size={11} /> Auto-filled based on selected municipality
+                        </p>
+                      )}
                     </div>
 
                     {/* Barangay */}
                     <div className="flex flex-col gap-1">
                       <label className="fieldset-legend">Barangay</label>
-                      <select className="select select-primary w-full">
-                        <option disabled>Select Barangay</option>
-                        <option>Abogado</option>
+                      <select
+                        className="select select-primary w-full"
+                        value={selectedBarangay}
+                        onChange={(e) => setSelectedBarangay(e.target.value)}
+                        disabled={barangays.length === 0}
+                      >
+                        <option disabled value="">Select Barangay</option>
+                        {barangays.map((b) => (
+                          <option key={b.code} value={b.code}>{b.name}</option>
+                        ))}
                       </select>
                     </div>
 
@@ -340,7 +477,7 @@ export default function SurveyPage() {
                                 value={member.relation}
                                 onChange={(e) => updateMember(member.id, 'relation', e.target.value)}
                               >
-                                <option disabled>--Select Relation--</option>
+                                <option disabled value=''>--Select Relation--</option>
                                 {RELATION_FAMHEAD.map((rel) => (
                                   <option key={rel} value={rel}>{rel}</option>
                                 ))}
@@ -371,7 +508,7 @@ export default function SurveyPage() {
                                 value={member.sex}
                                 onChange={(e) => updateMember(member.id, 'sex', e.target.value)}  
                               >
-                                <option disabled>--Select--</option>
+                                <option disabled value=''>--Select--</option>
                                 {SEX_OPTIONS.map((option) => (
                                   <option key={option} value={option}>{option}</option>
                                 ))}
@@ -383,7 +520,7 @@ export default function SurveyPage() {
                                 value={member.education}
                                 onChange={(e) => updateMember(member.id, 'education', e.target.value)}
                               >
-                                <option disabled>--Select--</option>
+                                <option disabled value=''>--Select--</option>
                                 {EDUCATIONAL_ATTAINMENT.map((educ) => (
                                   <option key={educ} value={educ}>{educ}</option>
                                 ))}
@@ -404,7 +541,7 @@ export default function SurveyPage() {
                                 value={member.vulnerability}
                                 onChange={(e) => updateMember(member.id, 'vulnerability', e.target.value)}
                               >
-                                <option disabled>--Select--</option>
+                                <option disabled value=''>--Select--</option>
                                 {VULNERABILITY_TYPES.map((v) => (
                                   <option key={v} value={v}>{v}</option>
                                 ))}
