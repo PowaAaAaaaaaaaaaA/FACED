@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen font-sans bg-white">
+    <div className="flex flex-col min-h-screen font-sans bg-[#FFFCFB]">
 
       <div className="w-full h-2 bg-gradient-to-r from-blue-900 via-blue-600 to-blue-400" />
 
