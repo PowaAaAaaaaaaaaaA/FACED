@@ -43,10 +43,11 @@ export default function Home() {
               Take Survey
             </button>
           </Link>
+           <Link href={'/admin'}>
           <button className="btn btn-outline btn-primary btn-md w-full rounded-xl text-sm tracking-wide">
             Login to Dashboard
           </button>
-
+          </Link>
           <p className="text-center text-xs text-slate-400 mt-2">
             For authorized DSWD personnel only.
           </p>
