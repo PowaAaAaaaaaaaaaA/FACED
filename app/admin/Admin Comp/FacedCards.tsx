@@ -1,30 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-type FacedCard = {
-  id: string;
-  serial_number: string;
-  full_name: string;
-  barangay: string;
-  municipality: string;
-  family_member_count: number;
-};
+import { useFacedStore, FacedCard } from "@/app/store/useFacedStore";
 
 export default function FacedCardList() {
   const [cards, setCards] = useState<FacedCard[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const selectedCard = useFacedStore((s) => s.selectedCard);
+  const setSelectedCard = useFacedStore((s) => s.setSelectedCard);
 
   useEffect(() => {
     async function fetchCards() {
       try {
         const res = await fetch("/api/faced-cards");
         const data = await res.json();
-
         if (!data.success) throw new Error(data.error);
-
         setCards(data.cards);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong");
@@ -38,8 +30,10 @@ export default function FacedCardList() {
 
   if (loading) {
     return (
-      <div className="w-[40%] flex items-center justify-center">
-        <span className="loading loading-spinner loading-md" />
+      <div className="w-full max-h-full overflow-auto flex flex-col gap-2">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="skeleton min-h-15 w-full"></div>
+        ))}
       </div>
     );
   }
@@ -53,13 +47,13 @@ export default function FacedCardList() {
   }
 
   return (
-    <div className="w-[40%] max-h-full overflow-auto flex flex-col gap-2">
+    <div className="w-full max-h-full overflow-auto flex flex-col gap-2">
       {cards.map((card) => (
         <div
           key={card.id}
-          onClick={() => setSelectedId(card.id)}
+          onClick={() => setSelectedCard(card)}
           className={`card card-border cursor-pointer transition-colors ${
-            selectedId === card.id
+            selectedCard?.id === card.id
               ? "bg-blue-50 border-blue-400"
               : "bg-base-100 hover:bg-base-200"
           }`}
