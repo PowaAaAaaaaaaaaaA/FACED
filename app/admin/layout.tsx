@@ -16,7 +16,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="drawer lg:drawer-open">
       <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex flex-col">
+      <div className="drawer-content flex flex-col overflow-hidden">
         <label htmlFor="my-drawer-3" className="btn drawer-button lg:hidden m-2 self-start">
           Open drawer
         </label>

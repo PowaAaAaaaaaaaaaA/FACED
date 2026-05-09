@@ -11,7 +11,7 @@ function Page() {
   const [activeView, setActiveView] = useState<ActiveView>("cards");
 
   return (
-    <div className="h-[100vh]">
+    <div className="overflow-hidden">
       <div className="navbar bg-base-100 shadow-sm">
         <div className="flex-1">
           <a className="btn btn-ghost text-xl">FACED System</a>
@@ -53,7 +53,7 @@ function Page() {
         </div>
       </div>
 
-      <div className="flex h-[80%] p-4 gap-4">
+      <div className="flex p-4 gap-4">
         <div className="w-[40%] max-h-full overflow-auto flex flex-col gap-2">
           <FacedCardList />
         </div>

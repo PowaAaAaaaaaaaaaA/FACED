@@ -14,8 +14,9 @@ export default function FacedCardList() {
   useEffect(() => {
     async function fetchCards() {
       try {
-        const res = await fetch("/api/faced-cards");
+        const res = await fetch("/api/card-content");
         const data = await res.json();
+        console.log("API raw:", data.cards[0])
         if (!data.success) throw new Error(data.error);
         setCards(data.cards);
       } catch (err) {

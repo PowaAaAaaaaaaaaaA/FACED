@@ -12,6 +12,10 @@ function CardContent() {
   const [activeTab, setActiveTab] = useState<Tab>("card-info");
   const selectedCard = useFacedStore((s) => s.selectedCard);
 
+  
+
+  console.log(selectedCard)
+
   const tabs: { id: Tab; label: string }[] = [
     { id: "card-info", label: "Card Info" },
     { id: "family-members", label: "Family Members" },
@@ -19,7 +23,7 @@ function CardContent() {
   ];
 
   return (
-    <div className="h-full">
+    <div className="">
       {/* Header */}
       <div className="bg-[#0D1B4B] flex items-center h-[10%] rounded-t-[5px] p-5 justify-between">
         <div className="text-white">
