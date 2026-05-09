@@ -53,23 +53,22 @@ function Page() {
         </div>
       </div>
 
-      <div className="flex p-4 gap-4">
-        <div className="w-[40%] max-h-full overflow-auto flex flex-col gap-2">
+      <div className="flex p-4 gap-4 h-[calc(100vh-140px)] min-h-0">
+
+        {/* LEFT PANEL */}
+        <div className="w-[30%] overflow-auto flex flex-col gap-2 min-h-0">
           <FacedCardList />
         </div>
 
-        <div className="w-[60%] bg-white">
-            {activeView === "cards" ? (
-              <>
-                <CardContent/>
-              </>
-            ) : (
-              <>
-                <PrintPanel/>
-              </>
-            )}
-          {/* Next step: panel content goes here */}
+        {/* RIGHT PANEL */}
+        <div className="flex-1 bg-white rounded-lg shadow overflow-hidden min-h-0">
+          {activeView === "cards" ? (
+            <CardContent />
+          ) : (
+            <PrintPanel />
+          )}
         </div>
+
       </div>
     </div>
   );

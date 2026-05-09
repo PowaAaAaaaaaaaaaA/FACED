@@ -10,11 +10,23 @@ export default function PrintPanel() {
 
   const handlePreview = async () => {
     if (!selectedCard?.id) return
+
     setLoading(true)
-    // Use blob so it previews instead of downloading
-    const res = await fetch(`/api/generate-pdf/${selectedCard.id}`)
+
+    // Prevent browser cache
+    const res = await fetch(
+      `/api/generate-pdf/${selectedCard.id}?t=${Date.now()}`
+    )
+
     const blob = await res.blob()
+
+    // Cleanup old blob URL
+    if (pdfUrl) {
+      URL.revokeObjectURL(pdfUrl)
+    }
+
     const url = URL.createObjectURL(blob)
+
     setPdfUrl(url)
     setLoading(false)
   }
@@ -28,35 +40,50 @@ export default function PrintPanel() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
+      
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b">
+      <div className="flex items-center justify-between p-3 border-b shrink-0">
         <div>
           <p className="text-sm font-semibold">{selectedCard.full_name}</p>
-          <p className="text-xs text-gray-400">{selectedCard.serial_number}</p>
+          <p className="text-xs text-gray-400">
+            {selectedCard.serial_number}
+          </p>
         </div>
+
         <div className="flex gap-2">
           <button
             className="btn btn-sm btn-outline btn-primary"
             onClick={handlePreview}
             disabled={loading}
           >
-            {loading ? <span className="loading loading-spinner loading-xs" /> : 'Preview'}
+            {loading ? (
+              <span className="loading loading-spinner loading-xs" />
+            ) : (
+              'Preview'
+            )}
           </button>
+
           <button
             className="btn btn-sm btn-primary"
-            onClick={() => window.open(`/api/generate-pdf/${selectedCard.id}`, '_blank')}
+            onClick={() =>
+              window.open(
+                `/api/generate-pdf/${selectedCard.id}`,
+                '_blank'
+              )
+            }
           >
-            <Printer size={14} /> Print / Save PDF
+            <Printer size={14} />
+            Print / Save PDF
           </button>
         </div>
       </div>
 
-      {/* PDF Preview */}
-      <div className="flex-1 bg-gray-100 overflow-hidden">
+      {/* PDF PREVIEW */}
+      <div className="flex-1 min-h-0 bg-gray-200">
         {pdfUrl ? (
           <iframe
-            src={pdfUrl}
+            src={`${pdfUrl}#zoom=140`}
             className="w-full h-full border-0"
             title="FACED Card Preview"
           />
