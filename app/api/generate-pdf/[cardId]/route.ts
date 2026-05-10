@@ -92,104 +92,77 @@ const toY = (plumberY: number) => PAGE_HEIGHT - plumberY
 // Right card = x + RIGHT_OFFSET, same y
 
 const FIELDS = {
-  serial_number:      { x: 405, y: toY(59), size: 7 },
-
-  // LOCATION
-  region:             { x: 120, y: toY(88), size: 7 },
-  district:           { x: 385, y: toY(88), size: 7 },
-
-  province:           { x: 110, y: toY(150), size: 7 },
-
-  // FIXED: was overlapping province
-  city_municipality:  { x: 150, y: toY(130), size: 7 },
-
-  barangay:           { x: 385, y: toY(100), size: 7 },
-
-  evacuation_center:  { x: 385, y: toY(112), size: 7 },
-
-  // HEAD OF FAMILY LEFT
-  last_name:          { x: 113, y: toY(128), size: 7 },
-  first_name:         { x: 113, y: toY(138), size: 7 },
-  middle_name:        { x: 113, y: toY(148), size: 7 },
-  name_extension:     { x: 113, y: toY(161), size: 7 },
-  birthdate:          { x: 113, y: toY(178), size: 7 },
-  age:                { x: 113, y: toY(192), size: 7 },
-  birthplace:         { x: 113, y: toY(202), size: 7 },
-
-  // HEAD OF FAMILY RIGHT
-  civil_status:       { x: 354, y: toY(128), size: 7 },
-  mothers_maiden_name:{ x: 354, y: toY(138), size: 7 },
-  religion:           { x: 354, y: toY(148), size: 7 },
-  occupation:         { x: 354, y: toY(158), size: 7 },
-  monthly_income:     { x: 354, y: toY(175), size: 7 },
-  id_card_presented:  { x: 354, y: toY(192), size: 7 },
-  id_card_number:     { x: 354, y: toY(202), size: 7 },
-
-  // SEX
-  sex_male_x:   94,
-  sex_female_x: 158,
-  sex_y:        toY(216),
-
-  // CONTACT
-  contact_primary:    { x: 305, y: toY(216), size: 7 },
-  contact_alternate:  { x: 402, y: toY(216), size: 7 },
-
-  // ADDRESS
-  permanent_address:  { x: 113, y: toY(240), size: 6.5 },
-
-  // OTHERS
-  fourps_x:     112,
-  fourps_y:     toY(271),
-
-  ip_x:         207,
-  ip_y:         toY(271),
-
-  ip_ethnicity: { x: 286, y: toY(271), size: 6.5 },
+  serial_number: { x: 403, y: toY(56), size: 7 },
+  region: { x: 137, y: toY(83), size: 7 },
+  district: { x: 354, y: toY(82), size: 7 },
+  province: { x: 138, y: toY(92), size: 7 },
+  barangay: { x: 354, y: toY(91), size: 7 },
+  city_municipality: { x: 139, y: toY(102), size: 7 },
+  evacuation_center: { x: 355, y: toY(102), size: 7 },
+  last_name: { x: 115, y: toY(127), size: 7 },
+  first_name: { x: 114, y: toY(138), size: 7 },
+  middle_name: { x: 114, y: toY(147), size: 7 },
+  name_extension: { x: 114, y: toY(161), size: 7 },
+  birthdate: { x: 114, y: toY(177), size: 7 },
+  age: { x: 115, y: toY(191), size: 7 },
+  birthplace: { x: 115, y: toY(202), size: 7 },
+  civil_status: { x: 354, y: toY(127), size: 7 },
+  mothers_maiden_name: { x: 354, y: toY(137), size: 7 },
+  religion: { x: 354, y: toY(147), size: 7 },
+  occupation: { x: 354, y: toY(157), size: 7 },
+  monthly_income: { x: 354, y: toY(174), size: 7 },
+  id_card_presented: { x: 354, y: toY(191), size: 7 },
+  id_card_number: { x: 354, y: toY(202), size: 7 },
+  sex_male_x: 83,
+  sex_male_y: toY(217),
+  sex_female_x: 147,
+  sex_female_y: toY(218),
+  contact_primary: { x: 313, y: toY(219), size: 7 },
+  contact_alternate: { x: 382, y: toY(220), size: 7 },
+  permanent_address: { x: 118, y: toY(236), size: 7 },
+  fourps_x: 101,
+  fourps_y: toY(269),
+  ip_x: 193,
+  ip_y: toY(270),
+  ip_ethnicity: { x: 281, y: toY(269), size: 7 },
 
   // ACCOUNT
-  bank_ewallet:   { x: 126, y: toY(437), size: 7 },
-  account_type:   { x: 330, y: toY(437), size: 7 },
-  account_name:   { x: 126, y: toY(447), size: 7 },
-  account_number: { x: 330, y: toY(447), size: 7 },
+  bank_ewallet: { x: 127, y: toY(436), size: 7 },
+  account_type: { x: 330, y: toY(436), size: 7 },
+  account_name: { x: 127, y: toY(445), size: 7 },
+  account_number: { x: 330, y: toY(446), size: 7 },
 
   // HOUSE OWNERSHIP
-  house_owner_x:  36,
-  house_renter_x: 90,
+  house_owner_x: 36,
+  house_owner_y: toY(473),
+  house_renter_x: 100,
+  house_renter_y: toY(472),
   house_sharer_x: 165,
-  house_y:        toY(462),
-
-  // SHELTER
-  shelter_partial_x: 295,
-  shelter_total_x:   375,
-  shelter_y:         toY(462),
-
-  // DATE
-  date_registered: { x: 150, y: toY(525), size: 7 },
+  house_sharer_y: toY(472),
+  //Shelter
+  shelter_partial_x: 248,
+  shelter_partial_y: toY(472),
+  shelter_total_x: 361,
+  shelter_total_y: toY(473),
+  date_registered: { x: 142, y: toY(519), size: 7 },
+  serial_number_back: { x: 436, y: toY(31), size: 7 },
 }
 
 // Family members table
 // Columns x positions (start of each cell)
 const FM_COLS = {
-  full_name:    29,
-  relation:     106,
-  birthdate:    153,
-  age:          207,
-  sex:          236,
-  education:    264,
-  occupation:   324,
-  vulnerability:382,
+  full_name:    32,
+  relation:     107,
+  birthdate:    156,
+  age:          216,
+  sex:          243,
+  education:    266,
+  occupation:   327,
+  vulnerability:387,
 }
 
-const FM_ROWS = [
-  327,
-  340,
-  353,
-  366,
-  379,
-  392,
-  405,
-  418,
-].map(y => toY(y))
+const FM_ROWS = [319, 328, 339, 349, 359, 369, 380, 390]
+  .map(y => toY(y - 8))
 
 // ─── Display value reverse maps ─────────────────────────────────────────────
 const SHELTER_DISPLAY: Record<string, string> = {
@@ -327,8 +300,8 @@ async function fillCard(
 
   // Sex checkboxes
   const sex = head?.sex ?? ''
-  drawCheckbox(page, fields.sex_male_x + xOffset,   fields.sex_y, sex === 'male',   font)
-  drawCheckbox(page, fields.sex_female_x + xOffset, fields.sex_y, sex === 'female', font)
+  drawCheckbox(page, fields.sex_male_x + xOffset,   fields.sex_male_y, sex === 'male',   font)
+  drawCheckbox(page, fields.sex_female_x + xOffset, fields.sex_female_y, sex === 'female', font)
 
   f(fields.contact_primary,   head?.contact_primary ?? '')
   f(fields.contact_alternate, head?.contact_alternate ?? '')
@@ -366,13 +339,13 @@ async function fillCard(
   f(fields.account_number, account?.account_number ?? '')
 
   const ownership = data.house_ownership
-  drawCheckbox(page, fields.house_owner_x  + xOffset, fields.house_y, ownership === 'owner',  font)
-  drawCheckbox(page, fields.house_renter_x + xOffset, fields.house_y, ownership === 'renter', font)
-  drawCheckbox(page, fields.house_sharer_x + xOffset, fields.house_y, ownership === 'sharer', font)
+  drawCheckbox(page, fields.house_owner_x  + xOffset, fields.house_owner_y, ownership === 'owner',  font)
+  drawCheckbox(page, fields.house_renter_x + xOffset, fields.house_renter_y, ownership === 'renter', font)
+  drawCheckbox(page, fields.house_sharer_x + xOffset, fields.house_sharer_y, ownership === 'sharer', font)
 
   const shelter = data.shelter_damage
-  drawCheckbox(page, fields.shelter_partial_x + xOffset, fields.shelter_y, shelter === 'partially_damaged', font)
-  drawCheckbox(page, fields.shelter_total_x   + xOffset, fields.shelter_y, shelter === 'totally_damaged',   font)
+  drawCheckbox(page, fields.shelter_partial_x + xOffset, fields.shelter_partial_y, shelter === 'partially_damaged', font)
+  drawCheckbox(page, fields.shelter_total_x   + xOffset, fields.shelter_total_y, shelter === 'totally_damaged',   font)
 
   f(fields.date_registered, data.date_registered ?? '')
 }
