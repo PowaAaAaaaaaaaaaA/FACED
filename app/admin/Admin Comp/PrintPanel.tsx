@@ -43,9 +43,9 @@ export default function PrintPanel() {
     <div className="flex flex-col h-full min-h-0">
       
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b shrink-0">
+      <div className="flex items-center justify-between p-3 border-b shrink-0 bg-[#0D1B4B]">
         <div>
-          <p className="text-sm font-semibold">{selectedCard.full_name}</p>
+          <p className="text-md font-semibold text-white">{selectedCard.full_name}</p>
           <p className="text-xs text-gray-400">
             {selectedCard.serial_number}
           </p>
@@ -53,7 +53,7 @@ export default function PrintPanel() {
 
         <div className="flex gap-2">
           <button
-            className="btn btn-sm btn-outline btn-primary"
+            className="btn btn-sm btn-outline btn-warning"
             onClick={handlePreview}
             disabled={loading}
           >
@@ -65,7 +65,7 @@ export default function PrintPanel() {
           </button>
 
           <button
-            className="btn btn-sm btn-primary"
+            className="btn btn-sm bg-[#f4f5ff] text-[#0D1B4B] hover:bg-[#0f2a81] hover:text-white"
             onClick={() =>
               window.open(
                 `/api/generate-pdf/${selectedCard.id}`,
