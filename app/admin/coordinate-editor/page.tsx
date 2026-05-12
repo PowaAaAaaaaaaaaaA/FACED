@@ -1,332 +1,513 @@
 "use client"
-import { useState, useRef } from "react"
+import { useState, useRef, useCallback } from "react"
 import Draggable from "react-draggable"
 
-// ─── All FACED fields with initial positions ─────────────────────────────────
+// ─── Constants ────────────────────────────────────────────────────────────────
+const PDF_WIDTH  = 963.84
+const PDF_HEIGHT = 612.12
+const PNG_WIDTH  = 2678
+const PNG_HEIGHT = 1701
 
-const PDF_SCALE = 2.7785  // image px per PDF point (2678 / 963.84)
-const IMG_WIDTH  = 2678   // your PNG width
-const IMG_HEIGHT = 1701   // your PNG height
+// PDF points → PNG pixels (y=0 at top in both)
+const PT_TO_PX_X = PNG_WIDTH  / PDF_WIDTH   // ≈ 2.7785
+const PT_TO_PX_Y = PNG_HEIGHT / PDF_HEIGHT  // ≈ 2.7785
 
-// These match the FIELDS object in route.ts
-// x = pixels from left of image, y = pixels from top of image
-const INITIAL_FIELDS = {
-  // Page 1 fields
-  serial_number:       { x: 403, y: 59,  page: 1 },
+// PDF pt → PNG px
+const ptToPx = (ptX: number, ptY: number) => ({
+  x: ptX * PT_TO_PX_X,
+  y: ptY * PT_TO_PX_Y,
+})
 
-  region:              { x: 120, y: 88,  page: 1 },
-  district:            { x: 385, y: 86,  page: 1 },
-  province:            { x: 120, y: 100, page: 1 },
-  barangay:            { x: 385, y: 99,  page: 1 },
-  city_municipality:   { x: 120, y: 112, page: 1 },
-  evacuation_center:   { x: 385, y: 112, page: 1 },
+// PNG px → PDF pt
+const pxToPt = (pxX: number, pxY: number) => ({
+  x: Math.round(pxX / PT_TO_PX_X),
+  y: Math.round(pxY / PT_TO_PX_Y),
+})
 
-  last_name:           { x: 113, y: 128, page: 1 },
-  first_name:          { x: 113, y: 138, page: 1 },
-  middle_name:         { x: 113, y: 148, page: 1 },
-  name_extension:      { x: 113, y: 161, page: 1 },
-  birthdate:           { x: 113, y: 178, page: 1 },
-  age:                 { x: 113, y: 192, page: 1 },
-  birthplace:          { x: 113, y: 202, page: 1 },
+// ─── Types ────────────────────────────────────────────────────────────────────
+type FieldType = 'text' | 'checkbox'
+type FieldGroup = 'serial' | 'location' | 'head' | 'family' | 'account' | 'shelter' | 'other'
 
-  civil_status:        { x: 354, y: 128, page: 1 },
-  mothers_maiden_name: { x: 354, y: 137, page: 1 },
-  religion:            { x: 354, y: 147, page: 1 },
-  occupation:          { x: 354, y: 157, page: 1 },
-  monthly_income:      { x: 354, y: 174, page: 1 },
-  id_card_presented:   { x: 354, y: 192, page: 1 },
-  id_card_number:      { x: 354, y: 201, page: 1 },
-
-  sex_male:            { x: 94,  y: 216, page: 1 },
-  sex_female:          { x: 158, y: 216, page: 1 },
-  contact_primary:     { x: 310, y: 216, page: 1 },
-  contact_alternate:   { x: 400, y: 216, page: 1 },
-
-  permanent_address:   { x: 113, y: 240, page: 1 },
-  fourps_checkbox:     { x: 112, y: 271, page: 1 },
-  ip_checkbox:         { x: 207, y: 271, page: 1 },
-  ip_ethnicity:        { x: 282, y: 271, page: 1 },
-
-  // Family members rows (row 1-8)
-  fm_row1:             { x: 29,  y: 326, page: 1 },
-  fm_row2:             { x: 29,  y: 339, page: 1 },
-  fm_row3:             { x: 29,  y: 352, page: 1 },
-  fm_row4:             { x: 29,  y: 365, page: 1 },
-  fm_row5:             { x: 29,  y: 378, page: 1 },
-  fm_row6:             { x: 29,  y: 391, page: 1 },
-  fm_row7:             { x: 29,  y: 404, page: 1 },
-  fm_row8:             { x: 29,  y: 417, page: 1 },
-
-  // Family member columns (use fm_row1 as reference row)
-  fm_col_relation:     { x: 106, y: 326, page: 1 },
-  fm_col_birthdate:    { x: 153, y: 326, page: 1 },
-  fm_col_age:          { x: 207, y: 326, page: 1 },
-  fm_col_sex:          { x: 236, y: 326, page: 1 },
-  fm_col_education:    { x: 264, y: 326, page: 1 },
-  fm_col_occupation:   { x: 324, y: 326, page: 1 },
-  fm_col_vulnerability:{ x: 382, y: 326, page: 1 },
-
-  bank_ewallet:        { x: 126, y: 437, page: 1 },
-  account_type:        { x: 330, y: 437, page: 1 },
-  account_name:        { x: 126, y: 447, page: 1 },
-  account_number:      { x: 330, y: 447, page: 1 },
-
-  house_owner:         { x: 36,  y: 462, page: 1 },
-  house_renter:        { x: 90,  y: 462, page: 1 },
-  house_sharer:        { x: 165, y: 462, page: 1 },
-  shelter_partial:     { x: 295, y: 462, page: 1 },
-  shelter_total:       { x: 375, y: 462, page: 1 },
-
-  date_registered:     { x: 150, y: 524, page: 1 },
-
-  // Page 2 — serial number on back
-  serial_number_back:  { x: 403, y: 55,  page: 2 },
+interface FieldDef {
+  // Stored in PNG pixels (NOT PDF points, NOT scaled canvas px)
+  // This avoids the double-conversion bug in the draggable
+  pxX: number
+  pxY: number
+  page: 1 | 2
+  type: FieldType
+  group: FieldGroup
+  label?: string
 }
 
-type FieldKey = keyof typeof INITIAL_FIELDS
+// Helper to define a field from PDF points (convenience for INITIAL_FIELDS)
+const pt = (ptX: number, ptY: number, page: 1 | 2, type: FieldType, group: FieldGroup, label?: string): FieldDef => ({
+  pxX: ptX * PT_TO_PX_X,
+  pxY: ptY * PT_TO_PX_Y,
+  page, type, group, label,
+})
+
+// ─── Initial field definitions (in PDF points for readability) ────────────────
+const INITIAL_FIELDS: Record<string, FieldDef> = {
+  serial_number:        pt(400, 54,  1, 'text',     'serial'),
+
+  region:               pt(128, 81,  1, 'text',     'location'),
+  district:             pt(385, 86,  1, 'text',     'location'),
+  province:             pt(128, 90,  1, 'text',     'location'),
+  barangay:             pt(385, 99,  1, 'text',     'location'),
+  city_municipality:    pt(128, 100, 1, 'text',     'location'),
+  evacuation_center:    pt(385, 112, 1, 'text',     'location'),
+
+  last_name:            pt(113, 127, 1, 'text',     'head'),
+  first_name:           pt(113, 137, 1, 'text',     'head'),
+  middle_name:          pt(113, 147, 1, 'text',     'head'),
+  name_extension:       pt(113, 159, 1, 'text',     'head'),
+  birthdate:            pt(112, 176, 1, 'text',     'head'),
+  age:                  pt(113, 192, 1, 'text',     'head'),
+  birthplace:           pt(113, 202, 1, 'text',     'head'),
+  civil_status:         pt(354, 128, 1, 'text',     'head'),
+  mothers_maiden_name:  pt(354, 137, 1, 'text',     'head'),
+  religion:             pt(354, 147, 1, 'text',     'head'),
+  occupation:           pt(354, 157, 1, 'text',     'head'),
+  monthly_income:       pt(354, 174, 1, 'text',     'head'),
+  id_card_presented:    pt(354, 192, 1, 'text',     'head'),
+  id_card_number:       pt(354, 201, 1, 'text',     'head'),
+  sex_male_x:           pt(82,  215, 1, 'checkbox', 'head', 'sex: male ☑'),
+  sex_female_x:         pt(145, 216, 1, 'checkbox', 'head', 'sex: female ☑'),
+  contact_primary:      pt(309, 218, 1, 'text',     'head'),
+  contact_alternate:    pt(381, 218, 1, 'text',     'head'),
+  permanent_address:    pt(112, 235, 1, 'text',     'head'),
+  fourps_x:             pt(99,  267, 1, 'checkbox', 'head', '4Ps ☑'),
+  ip_x:                 pt(192, 268, 1, 'checkbox', 'head', 'IP ☑'),
+  ip_ethnicity:         pt(281, 268, 1, 'text',     'head'),
+
+  fm_full_name_x:       pt(29,  316, 1, 'text',     'family', 'FM col: full_name'),
+  fm_relation_x:        pt(107, 316, 1, 'text',     'family', 'FM col: relation'),
+  fm_birthdate_x:       pt(155, 316, 1, 'text',     'family', 'FM col: birthdate'),
+  fm_age_x:             pt(209, 316, 1, 'text',     'family', 'FM col: age'),
+  fm_sex_x:             pt(237, 316, 1, 'text',     'family', 'FM col: sex'),
+  fm_education_x:       pt(265, 316, 1, 'text',     'family', 'FM col: education'),
+  fm_occupation_x:      pt(324, 316, 1, 'text',     'family', 'FM col: occupation'),
+  fm_vulnerability_x:   pt(382, 316, 1, 'text',     'family', 'FM col: vulnerability'),
+  fm_row1_y:            pt(29,  316, 1, 'text',     'family', 'FM row 1 ↕'),
+  fm_row2_y:            pt(29,  326, 1, 'text',     'family', 'FM row 2 ↕'),
+  fm_row3_y:            pt(29,  337, 1, 'text',     'family', 'FM row 3 ↕'),
+  fm_row4_y:            pt(29,  348, 1, 'text',     'family', 'FM row 4 ↕'),
+  fm_row5_y:            pt(29,  358, 1, 'text',     'family', 'FM row 5 ↕'),
+  fm_row6_y:            pt(29,  368, 1, 'text',     'family', 'FM row 6 ↕'),
+  fm_row7_y:            pt(29,  378, 1, 'text',     'family', 'FM row 7 ↕'),
+  fm_row8_y:            pt(29,  389, 1, 'text',     'family', 'FM row 8 ↕'),
+
+  bank_ewallet:         pt(126, 437, 1, 'text',     'account'),
+  account_type:         pt(330, 437, 1, 'text',     'account'),
+  account_name:         pt(126, 447, 1, 'text',     'account'),
+  account_number:       pt(330, 447, 1, 'text',     'account'),
+
+  house_owner_x:        pt(35,  471, 1, 'checkbox', 'shelter', 'Owner ☑'),
+  house_renter_x:       pt(98,  471, 1, 'checkbox', 'shelter', 'Renter ☑'),
+  house_sharer_x:       pt(162, 471, 1, 'checkbox', 'shelter', 'Sharer ☑'),
+  shelter_partial_x:    pt(247, 471, 1, 'checkbox', 'shelter', 'Partial ☑'),
+  shelter_total_x:      pt(359, 471, 1, 'checkbox', 'shelter', 'Total ☑'),
+
+  date_registered:      pt(154, 516, 1, 'text',     'other'),
+
+  serial_number_back:   pt(405, 55,  2, 'text',     'serial'),
+
+  // ── Page 2 — Assistance Records ──────────────────────────────────────────
+  // Columns — drag to align with each column header on page 2
+  // Use row 1 y as reference (all col markers sit on the same row)
+  ar_col_date:          pt(30,  100, 2, 'text', 'family', 'AR col: date'),
+  ar_col_recipient:     pt(78,  100, 2, 'text', 'family', 'AR col: recipient'),
+  ar_col_disaster:      pt(138, 100, 2, 'text', 'family', 'AR col: disaster_type'),
+  ar_col_type:          pt(198, 100, 2, 'text', 'family', 'AR col: assistance_type'),
+  ar_col_unit:          pt(268, 100, 2, 'text', 'family', 'AR col: unit'),
+  ar_col_quantity:      pt(298, 100, 2, 'text', 'family', 'AR col: quantity'),
+  ar_col_cost:          pt(328, 100, 2, 'text', 'family', 'AR col: cost'),
+  ar_col_provider:      pt(368, 100, 2, 'text', 'family', 'AR col: provider'),
+
+  // Rows — drag each to the correct row baseline on page 2
+  ar_row1_y:            pt(30,  100, 2, 'text', 'other', 'AR row 1 ↕'),
+  ar_row2_y:            pt(30,  111, 2, 'text', 'other', 'AR row 2 ↕'),
+  ar_row3_y:            pt(30,  122, 2, 'text', 'other', 'AR row 3 ↕'),
+  ar_row4_y:            pt(30,  133, 2, 'text', 'other', 'AR row 4 ↕'),
+  ar_row5_y:            pt(30,  144, 2, 'text', 'other', 'AR row 5 ↕'),
+  ar_row6_y:            pt(30,  155, 2, 'text', 'other', 'AR row 6 ↕'),
+  ar_row7_y:            pt(30,  166, 2, 'text', 'other', 'AR row 7 ↕'),
+  ar_row8_y:            pt(30,  177, 2, 'text', 'other', 'AR row 8 ↕'),
+  ar_row9_y:            pt(30,  188, 2, 'text', 'other', 'AR row 9 ↕'),
+  ar_row10_y:           pt(30,  199, 2, 'text', 'other', 'AR row 10 ↕'),
+}
+
 type Fields = typeof INITIAL_FIELDS
 
-// Color coding by field group
-const FIELD_COLORS: Record<string, string> = {
-  serial:   'bg-yellow-400',
-  location: 'bg-blue-500',
-  head:     'bg-green-500',
-  family:   'bg-purple-500',
-  account:  'bg-orange-500',
-  other:    'bg-red-500',
+// ─── Group colors ─────────────────────────────────────────────────────────────
+const GROUP_COLORS: Record<string, { border: string; dot: string }> = {
+  serial:   { border: '#EAB308', dot: '#EAB308' },
+  location: { border: '#3B82F6', dot: '#3B82F6' },
+  head:     { border: '#22C55E', dot: '#22C55E' },
+  family:   { border: '#A855F7', dot: '#A855F7' },
+  account:  { border: '#F97316', dot: '#F97316' },
+  shelter:  { border: '#EF4444', dot: '#EF4444' },
+  other:    { border: '#94A3B8', dot: '#94A3B8' },
 }
 
-function getColor(fieldName: string): string {
-  if (fieldName.includes('serial'))                             return FIELD_COLORS.serial
-  if (['region','district','province','barangay','city_municipality','evacuation_center'].includes(fieldName)) return FIELD_COLORS.location
-  if (['bank_ewallet','account_type','account_name','account_number'].includes(fieldName)) return FIELD_COLORS.account
-  if (fieldName.startsWith('fm_'))                             return FIELD_COLORS.family
-  if (['house_owner','house_renter','house_sharer','shelter_partial','shelter_total'].includes(fieldName)) return FIELD_COLORS.other
-  return FIELD_COLORS.head
+// ─── Code generator ───────────────────────────────────────────────────────────
+const CHECKBOX_KEYS = new Set([
+  'sex_male_x', 'sex_female_x', 'fourps_x', 'ip_x',
+  'house_owner_x', 'house_renter_x', 'house_sharer_x',
+  'shelter_partial_x', 'shelter_total_x',
+])
+const FM_COL_KEYS = new Set([
+  'fm_full_name_x','fm_relation_x','fm_birthdate_x','fm_age_x',
+  'fm_sex_x','fm_education_x','fm_occupation_x','fm_vulnerability_x',
+])
+const FM_ROW_KEYS = new Set([
+  'fm_row1_y','fm_row2_y','fm_row3_y','fm_row4_y',
+  'fm_row5_y','fm_row6_y','fm_row7_y','fm_row8_y',
+])
+
+function toPt(field: FieldDef) {
+  return pxToPt(field.pxX, field.pxY)
 }
 
+function generateRouteCode(fields: Fields): string {
+  const page1 = Object.entries(fields).filter(([, v]) => v.page === 1)
+  const lines: string[] = []
+
+  for (const [key, val] of page1) {
+    if (FM_COL_KEYS.has(key) || FM_ROW_KEYS.has(key)) continue
+    const { x, y } = toPt(val)
+    if (CHECKBOX_KEYS.has(key)) {
+      lines.push(`  ${key}: ${x},`)
+      lines.push(`  ${key.replace('_x', '_y')}: toY(${y}),`)
+    } else {
+      lines.push(`  ${key}: { x: ${x}, y: toY(${y}), size: 7 },`)
+    }
+  }
+
+  const fmRowYs = ['fm_row1_y','fm_row2_y','fm_row3_y','fm_row4_y',
+                   'fm_row5_y','fm_row6_y','fm_row7_y','fm_row8_y']
+    .map(k => toPt(fields[k]).y)
+
+  const fmRowsCode = `const FM_ROWS = [${fmRowYs.join(', ')}]\n  .map(y => toY(y - 8))`
+
+  const fmColNames = ['full_name','relation','birthdate','age','sex','education','occupation','vulnerability']
+  const fmColKeys  = ['fm_full_name_x','fm_relation_x','fm_birthdate_x','fm_age_x',
+                      'fm_sex_x','fm_education_x','fm_occupation_x','fm_vulnerability_x']
+  const fmColLines = fmColNames.map((name, i) => `  ${name}: ${toPt(fields[fmColKeys[i]]).x},`)
+  const fmColsCode = `const FM_COLS = {\n${fmColLines.join('\n')}\n}`
+
+  const p2 = toPt(fields['serial_number_back'])
+  const page2Code = `// Page 2 (back)\nconst BACK_SERIAL_X = ${p2.x}\nconst BACK_SERIAL_Y = toY(${p2.y})`
+
+  // Assistance record rows
+  const arRowKeys = ['ar_row1_y','ar_row2_y','ar_row3_y','ar_row4_y','ar_row5_y',
+                     'ar_row6_y','ar_row7_y','ar_row8_y','ar_row9_y','ar_row10_y','ar_row11_y', 'ar_row12_y', 'ar_row13_y', 'ar_row14_y', 'ar_row15_y', 'ar_row16_y']
+  const arRowYs = arRowKeys.map(k => toPt(fields[k]).y)
+  const arRowsCode = `const ASSISTANCE_MAX_ROWS = ${arRowYs.length}\nconst ASSISTANCE_ROWS = [${arRowYs.join(', ')}].map(y => toY(y))`
+
+  const arColMap: [string, string][] = [
+    ['date',            'ar_col_date'],
+    ['recipient',       'ar_col_recipient'],
+    ['disaster_type',   'ar_col_disaster'],
+    ['assistance_type', 'ar_col_type'],
+    ['unit',            'ar_col_unit'],
+    ['quantity',        'ar_col_quantity'],
+    ['cost',            'ar_col_cost'],
+    ['provider',        'ar_col_provider'],
+  ]
+  const arColLines = arColMap.map(([name, key]) => `  ${name}: ${toPt(fields[key]).x},`)
+  const arColsCode = `const ASSISTANCE_COLS = {\n${arColLines.join('\n')}\n}`
+
+  return [
+    `// Generated by FACED Coordinate Editor — paste into route.ts`,
+    `const FIELDS = {\n${lines.join('\n')}\n}`,
+    fmRowsCode,
+    fmColsCode,
+    page2Code,
+    arRowsCode,
+    arColsCode,
+  ].join('\n\n')
+}
+
+// ─── Draggable Marker ─────────────────────────────────────────────────────────
+// KEY FIX: position is stored and passed as CANVAS pixels (pxX * scale, pxY * scale).
+// On drag, data.x/data.y are already canvas pixels — we convert back to PNG pixels
+// by dividing by scale, then store as PNG pixels. No double-conversion.
 function DraggableMarker({
-  fieldName,
-  coords,
+  fieldKey,
+  field,
   onUpdate,
   scale,
+  isSelected,
+  onSelect,
 }: {
-  fieldName: string
-  coords: { x: number; y: number; page: number }
-  onUpdate: (name: string, x: number, y: number) => void
+  fieldKey: string
+  field: FieldDef
+  onUpdate: (key: string, pxX: number, pxY: number) => void
   scale: number
+  isSelected: boolean
+  onSelect: (key: string) => void
 }) {
   const nodeRef = useRef<HTMLDivElement>(null)
-  const color = getColor(fieldName)
+  const colors = GROUP_COLORS[field.group]
+  const label = field.label ?? fieldKey
+  const pt = pxToPt(field.pxX, field.pxY)
+
+  // Canvas position = PNG pixel position * scale
+  const canvasX = field.pxX * scale
+  const canvasY = field.pxY * scale
 
   return (
     <Draggable
       nodeRef={nodeRef}
-      position={{
-        x: coords.x * PDF_SCALE * scale,  // PDF pt → image px → scaled
-        y: coords.y * PDF_SCALE * scale,
-      }}
-      onDrag={(_, data) => {
-        // Convert back: scaled px → image px → PDF pt
-        onUpdate(
-          fieldName,
-          Math.round(data.x / scale / PDF_SCALE),
-          Math.round(data.y / scale / PDF_SCALE)
-        )
-      }}
+      position={{ x: canvasX, y: canvasY }}
+      // onDrag: data.x is canvas px → divide by scale → PNG px
+      onDrag={(_, data) => onUpdate(fieldKey, data.x / scale, data.y / scale)}
+      onStart={() => onSelect(fieldKey)}
       bounds="parent"
     >
-      <div ref={nodeRef} className="absolute cursor-move select-none z-10" style={{ top: 0, left: 0 }}>
-        <div className={`w-3 h-3 rounded-full ${color} border border-white shadow-md`} />
-        <div className="absolute left-4 top-0 bg-gray-900/90 text-white text-[9px] px-1.5 py-0.5 rounded whitespace-nowrap pointer-events-none">
-          {fieldName} ({coords.x}, {coords.y})
-        </div>
+      <div
+        ref={nodeRef}
+        className="absolute cursor-move select-none"
+        style={{ top: 0, left: 0, zIndex: isSelected ? 20 : 10 }}
+        onClick={() => onSelect(fieldKey)}
+      >
+        <div style={{
+          width: field.type === 'checkbox' ? 10 : 8,
+          height: field.type === 'checkbox' ? 10 : 8,
+          borderRadius: field.type === 'checkbox' ? 2 : '50%',
+          background: colors.dot,
+          border: '1.5px solid white',
+          boxShadow: isSelected ? `0 0 0 2px ${colors.dot}` : '0 1px 3px rgba(0,0,0,0.5)',
+        }} />
+        {/* Label — always show when selected or showTooltips; shows PDF pt coords */}
+        {isSelected && (
+          <div style={{
+            position: 'absolute', left: 12, top: -2,
+            background: 'rgba(10,10,10,0.92)', color: colors.dot,
+            fontSize: 9, padding: '1px 5px', borderRadius: 3,
+            whiteSpace: 'nowrap', pointerEvents: 'none',
+            border: `1px solid ${colors.border}`,
+          }}>
+            {label} — pt({pt.x}, {pt.y})
+          </div>
+        )}
       </div>
     </Draggable>
   )
 }
 
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function CoordinateEditorPage() {
-  const [fields, setFields] = useState<Fields>(INITIAL_FIELDS)
+  const [fields, setFields] = useState<Fields>(() =>
+    // Deep clone so resets work correctly
+    Object.fromEntries(Object.entries(INITIAL_FIELDS).map(([k, v]) => [k, { ...v }]))
+  )
   const [activePage, setActivePage] = useState<1 | 2>(1)
-  const [scale, setScale] = useState(1)
+  const [scale, setScale] = useState(0.5)
   const [copied, setCopied] = useState(false)
+  const [selectedField, setSelectedField] = useState<string | null>(null)
   const [activeGroup, setActiveGroup] = useState<string>('all')
+  const [showTooltips, setShowTooltips] = useState(false)
 
-  const updateField = (name: string, x: number, y: number) => {
-    setFields(prev => ({
-      ...prev,
-      [name]: { ...prev[name as FieldKey], x, y },
-    }))
+  // Stores PNG pixel positions (not canvas, not PDF pt)
+  const updateField = useCallback((key: string, pxX: number, pxY: number) => {
+    setFields(prev => ({ ...prev, [key]: { ...prev[key], pxX, pxY } }))
+  }, [])
+
+  const resetField = (key: string) => {
+    setFields(prev => ({ ...prev, [key]: { ...INITIAL_FIELDS[key] } }))
   }
 
-  // Generate the FIELDS object code to paste into route.ts
-  const generateCode = () => {
-    const PAGE_HEIGHT = 612.12
-    const toY = (y: number) => (PAGE_HEIGHT - y).toFixed(1)
-
-    const lines = Object.entries(fields)
-      .filter(([, v]) => v.page === 1 || [])
-      .map(([key, v]) => {
-        if (['sex_male','sex_female','fourps_checkbox','ip_checkbox',
-             'house_owner','house_renter','house_sharer',
-             'shelter_partial','shelter_total'].includes(key)) {
-          return `  ${key}_x: ${v.x},\n  ${key}_y: toY(${v.y}),`
-        }
-        if (key.startsWith('fm_row')) {
-          return `  // ${key}: y = toY(${v.y}) → ${toY(v.y)}`
-        }
-        if (key.startsWith('fm_col')) {
-          return `  // ${key}: x = ${v.x}`
-        }
-        return `  ${key}: { x: ${v.x}, y: toY(${v.y}), size: 7 },`
-      })
-      .join('\n')
-
-    // FM_ROWS array
-    const fmRows = Object.entries(fields)
-      .filter(([k]) => k.startsWith('fm_row'))
-      .map(([, v]) => v.y)
-    const fmRowsCode = `\nconst FM_ROWS = [${fmRows.join(', ')}]\n  .map(y => toY(y - 8))`
-
-    // FM_COLS object
-    const fmCols = Object.entries(fields)
-      .filter(([k]) => k.startsWith('fm_col'))
-      .map(([k, v]) => `  ${k.replace('fm_col_', '')}: ${v.x}`)
-    const fmColsCode = `\nconst FM_COLS = {\n  full_name: ${fields.fm_row1.x},\n${fmCols.join(',\n')}\n}`
-
-    return `const FIELDS = {\n${lines}\n}${fmRowsCode}${fmColsCode}`
+  // Direct PDF pt input from the inspector panel
+  const updateFieldPt = (key: string, axis: 'x' | 'y', ptVal: number) => {
+    setFields(prev => {
+      const f = prev[key]
+      const newPxX = axis === 'x' ? ptVal * PT_TO_PX_X : f.pxX
+      const newPxY = axis === 'y' ? ptVal * PT_TO_PX_Y : f.pxY
+      return { ...prev, [key]: { ...f, pxX: newPxX, pxY: newPxY } }
+    })
   }
 
   const copyCode = () => {
-    navigator.clipboard.writeText(generateCode())
+    navigator.clipboard.writeText(generateRouteCode(fields))
     setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    setTimeout(() => setCopied(false), 2500)
   }
 
   const pageFields = Object.entries(fields).filter(([, v]) => v.page === activePage)
-
-  const groups = ['all', 'location', 'head', 'family', 'account', 'other', 'serial']
   const visibleFields = activeGroup === 'all'
     ? pageFields
-    : pageFields.filter(([name]) => getColor(name) === FIELD_COLORS[activeGroup])
+    : pageFields.filter(([, v]) => v.group === activeGroup)
+
+  const groups = ['all', ...Object.keys(GROUP_COLORS)] as const
+  const sel = selectedField ? fields[selectedField] : null
+  const selPt = sel ? pxToPt(sel.pxX, sel.pxY) : null
+
+  const canvasW = Math.round(PNG_WIDTH * scale)
+  const canvasH = Math.round(PNG_HEIGHT * scale)
+
+  const S = (obj: React.CSSProperties): React.CSSProperties => obj
 
   return (
-    <div className="flex h-screen bg-gray-950 text-white overflow-hidden">
+    <div style={S({ display: 'flex', height: '100vh', background: '#0a0a0f', color: '#e2e8f0', fontFamily: 'monospace', overflow: 'hidden' })}>
 
       {/* ── Sidebar ── */}
-      <div className="w-72 flex flex-col border-r border-gray-800 overflow-hidden shrink-0">
-        <div className="p-4 border-b border-gray-800">
-          <h1 className="font-bold text-sm">FACED Coordinate Mapper</h1>
-          <p className="text-xs text-gray-400 mt-1">Drag red dots to position fields</p>
-        </div>
+      <div style={S({ width: 280, display: 'flex', flexDirection: 'column', borderRight: '1px solid #1e293b', background: '#0d1117', flexShrink: 0, overflow: 'hidden' })}>
 
-        {/* Page selector */}
-        <div className="p-3 border-b border-gray-800 flex gap-2">
-          <button
-            onClick={() => setActivePage(1)}
-            className={`flex-1 btn btn-xs ${activePage === 1 ? 'btn-primary' : 'btn-ghost'}`}
-          >Page 1 (Front)</button>
-          <button
-            onClick={() => setActivePage(2)}
-            className={`flex-1 btn btn-xs ${activePage === 2 ? 'btn-primary' : 'btn-ghost'}`}
-          >Page 2 (Back)</button>
-        </div>
-
-        {/* Scale */}
-        <div className="p-3 border-b border-gray-800">
-          <label className="text-xs text-gray-400">Zoom: {Math.round(scale * 100)}%</label>
-          <input
-            type="range" min={0.3} max={2} step={0.05}
-            value={scale}
-            onChange={e => setScale(parseFloat(e.target.value))}
-            className="range range-xs range-primary w-full mt-1"
-          />
-        </div>
-
-        {/* Group filter */}
-        <div className="p-3 border-b border-gray-800">
-          <label className="text-xs text-gray-400 mb-2 block">Show fields</label>
-          <div className="flex flex-wrap gap-1">
-            {groups.map(g => (
-              <button
-                key={g}
-                onClick={() => setActiveGroup(g)}
-                className={`btn btn-xs ${activeGroup === g ? 'btn-primary' : 'btn-ghost'}`}
-              >{g}</button>
-            ))}
+        <div style={S({ padding: '14px 16px', borderBottom: '1px solid #1e293b', flexShrink: 0 })}>
+          <div style={S({ fontSize: 13, fontWeight: 700, color: '#f1f5f9' })}>FACED PDF MAPPER</div>
+          <div style={S({ fontSize: 10, color: '#475569', marginTop: 3 })}>
+            Markers store PNG px internally · labels show PDF pt
           </div>
         </div>
 
-        {/* Field list */}
-        <div className="flex-1 overflow-y-auto p-3">
-          <p className="text-xs text-gray-500 mb-2">
-            {visibleFields.length} fields on page {activePage}
-          </p>
-          {visibleFields.map(([name, coords]) => (
-            <div key={name} className="flex items-center justify-between py-1 border-b border-gray-800/50 text-xs">
-              <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${getColor(name)}`} />
-                <span className="text-gray-300 truncate max-w-[120px]">{name}</span>
-              </div>
-              <span className="text-gray-500 font-mono">{coords.x}, {coords.y}</span>
-            </div>
+        {/* Page */}
+        <div style={S({ display: 'flex', gap: 6, padding: '10px 12px', borderBottom: '1px solid #1e293b', flexShrink: 0 })}>
+          {([1, 2] as const).map(p => (
+            <button key={p} onClick={() => setActivePage(p)} style={S({
+              flex: 1, padding: '5px 0', fontSize: 11, cursor: 'pointer', borderRadius: 4,
+              background: activePage === p ? '#1d4ed8' : '#1e293b',
+              color: activePage === p ? '#fff' : '#94a3b8', border: 'none',
+            })}>Page {p} {p === 1 ? '(Front)' : '(Back)'}</button>
           ))}
         </div>
 
-        {/* Copy button */}
-        <div className="p-3 border-t border-gray-800">
-          <button
-            onClick={copyCode}
-            className={`btn btn-sm w-full ${copied ? 'btn-success' : 'btn-primary'}`}
-          >
-            {copied ? '✓ Copied to clipboard!' : '📋 Copy FIELDS code'}
+        {/* Zoom */}
+        <div style={S({ padding: '8px 12px', borderBottom: '1px solid #1e293b', flexShrink: 0 })}>
+          <div style={S({ fontSize: 10, color: '#64748b', marginBottom: 4 })}>
+            Zoom {Math.round(scale * 100)}% · canvas {canvasW}×{canvasH}px
+          </div>
+          <input type="range" min={0.2} max={1.5} step={0.05} value={scale}
+            onChange={e => setScale(parseFloat(e.target.value))}
+            style={{ width: '100%', accentColor: '#3b82f6' }} />
+        </div>
+
+        {/* Groups */}
+        <div style={S({ padding: '8px 12px', borderBottom: '1px solid #1e293b', flexShrink: 0 })}>
+          <div style={S({ display: 'flex', flexWrap: 'wrap', gap: 4 })}>
+            {groups.map(g => (
+              <button key={g} onClick={() => setActiveGroup(g)} style={S({
+                padding: '3px 8px', fontSize: 10, cursor: 'pointer', borderRadius: 3,
+                background: activeGroup === g ? (g === 'all' ? '#1d4ed8' : GROUP_COLORS[g]?.dot ?? '#1d4ed8') : '#1e293b',
+                color: activeGroup === g ? '#fff' : '#64748b', border: 'none', fontFamily: 'monospace',
+              })}>{g}</button>
+            ))}
+          </div>
+          <label style={S({ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, fontSize: 10, color: '#64748b', cursor: 'pointer' })}>
+            <input type="checkbox" checked={showTooltips} onChange={e => setShowTooltips(e.target.checked)} />
+            Always show labels
+          </label>
+        </div>
+
+        {/* Inspector */}
+        {selectedField && sel && selPt && (
+          <div style={S({ padding: '10px 12px', borderBottom: '1px solid #1e293b', background: '#0f172a', flexShrink: 0 })}>
+            <div style={S({ fontSize: 10, color: '#94a3b8', marginBottom: 4 })}>SELECTED</div>
+            <div style={S({ fontSize: 11, color: GROUP_COLORS[sel.group].dot, fontWeight: 600, marginBottom: 8 })}>{selectedField}</div>
+            <div style={S({ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 8 })}>
+              {(['x', 'y'] as const).map(axis => (
+                <div key={axis}>
+                  <div style={S({ fontSize: 9, color: '#475569', marginBottom: 3 })}>{axis.toUpperCase()} — PDF points</div>
+                  <input
+                    type="number"
+                    value={axis === 'x' ? selPt.x : selPt.y}
+                    onChange={e => updateFieldPt(selectedField, axis, +e.target.value)}
+                    style={S({ width: '100%', padding: '4px 6px', fontSize: 11, background: '#1e293b', border: '1px solid #334155', borderRadius: 3, color: '#e2e8f0', fontFamily: 'monospace' })}
+                  />
+                </div>
+              ))}
+            </div>
+            <div style={S({ fontSize: 9, color: '#475569', marginBottom: 6 })}>
+              PNG px: {Math.round(sel.pxX)}, {Math.round(sel.pxY)}
+            </div>
+            <button onClick={() => resetField(selectedField)} style={S({
+              width: '100%', padding: '4px 0', fontSize: 10, cursor: 'pointer',
+              background: '#1e293b', border: '1px solid #334155', borderRadius: 3, color: '#94a3b8',
+            })}>↺ Reset to default</button>
+          </div>
+        )}
+
+        {/* Field list */}
+        <div style={S({ flex: 1, overflowY: 'auto', padding: '8px 12px' })}>
+          <div style={S({ fontSize: 9, color: '#475569', marginBottom: 6 })}>{visibleFields.length} fields</div>
+          {visibleFields.map(([key, val]) => {
+            const pt = pxToPt(val.pxX, val.pxY)
+            return (
+              <div key={key} onClick={() => setSelectedField(key)} style={S({
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '4px 6px', borderRadius: 3, cursor: 'pointer', marginBottom: 1,
+                background: selectedField === key ? '#1e293b' : 'transparent',
+                border: selectedField === key ? `1px solid ${GROUP_COLORS[val.group].border}` : '1px solid transparent',
+              })}>
+                <div style={S({ display: 'flex', alignItems: 'center', gap: 6 })}>
+                  <div style={S({ width: 6, height: 6, borderRadius: val.type === 'checkbox' ? 1 : '50%', background: GROUP_COLORS[val.group].dot, flexShrink: 0 })} />
+                  <span style={S({ fontSize: 10, color: '#cbd5e1', maxWidth: 130, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' })}>
+                    {val.label ?? key}
+                  </span>
+                </div>
+                <span style={S({ fontSize: 9, color: '#475569', fontFamily: 'monospace' })}>{pt.x},{pt.y}</span>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Copy */}
+        <div style={S({ padding: '12px', borderTop: '1px solid #1e293b', flexShrink: 0 })}>
+          <button onClick={copyCode} style={S({
+            width: '100%', padding: '8px 0', fontSize: 12, cursor: 'pointer', borderRadius: 4,
+            background: copied ? '#15803d' : '#1d4ed8', color: '#fff', border: 'none', fontWeight: 600,
+          })}>
+            {copied ? '✓ Copied!' : '⎘ Copy FIELDS code for route.ts'}
           </button>
-          <p className="text-xs text-gray-500 mt-2 text-center">
-            Paste into route.ts FIELDS object
-          </p>
+          <div style={S({ fontSize: 9, color: '#475569', textAlign: 'center', marginTop: 6 })}>
+            Replaces FIELDS · FM_ROWS · FM_COLS in route.ts
+          </div>
         </div>
       </div>
 
-      {/* ── PDF Image Canvas ── */}
-      <div className="flex-1 overflow-auto bg-gray-900 p-6">
-        <div
-          className="relative border border-gray-600 shadow-2xl"
-          style={{ width:  `${IMG_WIDTH  * scale}px`,
-                height: `${IMG_HEIGHT * scale}px`, }}
-        >
-          {/* Page image */}
+      {/* ── Canvas ── */}
+      <div style={S({ flex: 1, overflow: 'auto', padding: 24, background: '#111827' })}>
+        <div style={S({ position: 'relative', width: canvasW, height: canvasH, border: '1px solid #334155', boxShadow: '0 8px 32px rgba(0,0,0,0.6)', flexShrink: 0 })}>
           <img
             src={activePage === 1 ? '/FACED_FORM-1.png' : '/FACED_FORM-2.png'}
             alt={`FACED Form Page ${activePage}`}
-            className="block w-full"
             draggable={false}
-            style={{ width: '100%', height: '100%' }}
+            style={{ display: 'block', width: '100%', height: '100%', userSelect: 'none' }}
           />
-
-          {/* Draggable markers */}
-          {visibleFields.map(([name, coords]) => (
+          {visibleFields.map(([key, val]) => (
             <DraggableMarker
-              key={name}
-              fieldName={name}
-              coords={coords}
+              key={key}
+              fieldKey={key}
+              field={val}
               onUpdate={updateField}
               scale={scale}
+              isSelected={selectedField === key || showTooltips}
+              onSelect={setSelectedField}
             />
           ))}
         </div>
 
-        {/* Legend */}
-        <div className="mt-4 flex gap-4 flex-wrap">
-          {Object.entries(FIELD_COLORS).map(([group, color]) => (
-            <div key={group} className="flex items-center gap-2 text-xs text-gray-400">
-              <div className={`w-3 h-3 rounded-full ${color}`} />
-              {group}
+        <div style={S({ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 14 })}>
+          {Object.entries(GROUP_COLORS).map(([g, c]) => (
+            <div key={g} style={S({ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: '#64748b' })}>
+              <div style={S({ width: 8, height: 8, borderRadius: '50%', background: c.dot })} /> {g}
             </div>
           ))}
         </div>
-      </div>
 
+        <div style={S({ marginTop: 12, padding: '8px 12px', background: '#0d1117', borderRadius: 6, border: '1px solid #1e293b', fontSize: 10, color: '#475569', maxWidth: 640, lineHeight: 1.7 })}>
+          <strong style={{ color: '#64748b' }}>How to calibrate:</strong><br />
+          1. Enable &quot;Always show labels&quot; to see all field names<br />
+          2. Compare dot positions against the actual form fields<br />
+          3. Drag a dot to sit at the <em>start</em> of where the text should appear<br />
+          4. Use the inspector panel to type exact PDF pt values if needed<br />
+          5. Click &quot;Copy FIELDS code&quot; → paste into route.ts replacing FIELDS, FM_ROWS, FM_COLS<br />
+          <br />
+          <strong style={{ color: '#64748b' }}>Coordinate system:</strong>{' '}
+          x=0 is left edge · y=0 is top of page · right card starts at x=481pt (handled by RIGHT_OFFSET in route.ts)
+        </div>
+      </div>
     </div>
   )
 }

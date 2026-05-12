@@ -91,87 +91,91 @@ const toY = (plumberY: number) => PAGE_HEIGHT - plumberY
 // Each field: { x, y } where x/y are for the LEFT (Beneficiary) card
 // Right card = x + RIGHT_OFFSET, same y
 
+
 const FIELDS = {
-  serial_number: { x: 403, y: toY(56), size: 7 },
-  region: { x: 137, y: toY(83), size: 7 },
-  district: { x: 354, y: toY(82), size: 7 },
-  province: { x: 138, y: toY(92), size: 7 },
-  barangay: { x: 354, y: toY(91), size: 7 },
-  city_municipality: { x: 139, y: toY(102), size: 7 },
-  evacuation_center: { x: 355, y: toY(102), size: 7 },
-  last_name: { x: 115, y: toY(127), size: 7 },
-  first_name: { x: 114, y: toY(138), size: 7 },
-  middle_name: { x: 114, y: toY(147), size: 7 },
-  name_extension: { x: 114, y: toY(161), size: 7 },
-  birthdate: { x: 114, y: toY(177), size: 7 },
-  age: { x: 115, y: toY(191), size: 7 },
-  birthplace: { x: 115, y: toY(202), size: 7 },
-  civil_status: { x: 354, y: toY(127), size: 7 },
-  mothers_maiden_name: { x: 354, y: toY(137), size: 7 },
-  religion: { x: 354, y: toY(147), size: 7 },
-  occupation: { x: 354, y: toY(157), size: 7 },
-  monthly_income: { x: 354, y: toY(174), size: 7 },
-  id_card_presented: { x: 354, y: toY(191), size: 7 },
-  id_card_number: { x: 354, y: toY(202), size: 7 },
-  sex_male_x: 83,
-  sex_male_y: toY(217),
-  sex_female_x: 147,
-  sex_female_y: toY(218),
-  contact_primary: { x: 313, y: toY(219), size: 7 },
-  contact_alternate: { x: 382, y: toY(220), size: 7 },
-  permanent_address: { x: 118, y: toY(236), size: 7 },
-  fourps_x: 101,
-  fourps_y: toY(269),
-  ip_x: 193,
-  ip_y: toY(270),
-  ip_ethnicity: { x: 281, y: toY(269), size: 7 },
-
-  // ACCOUNT
-  bank_ewallet: { x: 127, y: toY(436), size: 7 },
-  account_type: { x: 330, y: toY(436), size: 7 },
-  account_name: { x: 127, y: toY(445), size: 7 },
-  account_number: { x: 330, y: toY(446), size: 7 },
-
-  // HOUSE OWNERSHIP
-  house_owner_x: 36,
-  house_owner_y: toY(473),
-  house_renter_x: 100,
-  house_renter_y: toY(472),
-  house_sharer_x: 165,
-  house_sharer_y: toY(472),
-  //Shelter
-  shelter_partial_x: 248,
-  shelter_partial_y: toY(472),
-  shelter_total_x: 361,
-  shelter_total_y: toY(473),
-  date_registered: { x: 142, y: toY(519), size: 7 },
-  serial_number_back: { x: 436, y: toY(31), size: 7 },
+  serial_number: { x: 398, y: toY(60), size: 7 },
+  region: { x: 124, y: toY(89), size: 7 },
+  district: { x: 353, y: toY(88), size: 7 },
+  province: { x: 137, y: toY(98), size: 7 },
+  barangay: { x: 353, y: toY(98), size: 7 },
+  city_municipality: { x: 137, y: toY(109), size: 7 },
+  evacuation_center: { x: 353, y: toY(109), size: 7 },
+  last_name: { x: 124, y: toY(134), size: 7 },
+  first_name: { x: 124, y: toY(144), size: 7 },
+  middle_name: { x: 124, y: toY(154), size: 7 },
+  name_extension: { x: 124, y: toY(167), size: 7 },
+  birthdate: { x: 124, y: toY(184), size: 7 },
+  age: { x: 123, y: toY(198), size: 7 },
+  birthplace: { x: 123, y: toY(208), size: 7 },
+  civil_status: { x: 358, y: toY(133), size: 7 },
+  mothers_maiden_name: { x: 348, y: toY(143), size: 7 },
+  religion: { x: 358, y: toY(153), size: 7 },
+  occupation: { x: 358, y: toY(163), size: 7 },
+  monthly_income: { x: 358, y: toY(181), size: 7 },
+  id_card_presented: { x: 358, y: toY(197), size: 7 },
+  id_card_number: { x: 358, y: toY(207), size: 7 },
+  sex_male_x: 82,
+  sex_male_y: toY(222),
+  sex_female_x: 145,
+  sex_female_y: toY(222),
+  contact_primary: { x: 312, y: toY(225), size: 7 },
+  contact_alternate: { x: 384, y: toY(225), size: 7 },
+  permanent_address: { x: 115, y: toY(244), size: 7 },
+  fourps_x: 99,
+  fourps_y: toY(273),
+  ip_x: 192,
+  ip_y: toY(273),
+  ip_ethnicity: { x: 282, y: toY(276), size: 7 },
+  bank_ewallet: { x: 128, y: toY(442), size: 7 },
+  account_type: { x: 332, y: toY(442), size: 7 },
+  account_name: { x: 128, y: toY(452), size: 7 },
+  account_number: { x: 332, y: toY(453), size: 7 },
+  house_owner_x: 35,
+  house_owner_y: toY(478),
+  house_renter_x: 99,
+  house_renter_y: toY(478),
+  house_sharer_x: 163,
+  house_sharer_y: toY(478),
+  shelter_partial_x: 247,
+  shelter_partial_y: toY(477),
+  shelter_total_x: 359,
+  shelter_total_y: toY(477),
+  date_registered: { x: 177, y: toY(524), size: 7 },
 }
 
-// Family members table
-// Columns x positions (start of each cell)
-const FM_COLS = {
-  full_name:    32,
-  relation:     107,
-  birthdate:    156,
-  age:          216,
-  sex:          243,
-  education:    266,
-  occupation:   327,
-  vulnerability:387,
-}
-
-const FM_ROWS = [319, 328, 339, 349, 359, 369, 380, 390]
+const FM_ROWS = [325, 335, 346, 356, 366, 377, 387, 397]
   .map(y => toY(y - 8))
 
+const FM_COLS = {
+  full_name: 30,
+  relation: 108,
+  birthdate: 155,
+  age: 209,
+  sex: 237,
+  education: 265,
+  occupation: 326,
+  vulnerability: 384,
+}
+
+// Page 2 (back)
+const BACK_SERIAL_X = 404
+const BACK_SERIAL_Y = toY(72)
+
+const ASSISTANCE_MAX_ROWS = 10
+const ASSISTANCE_ROWS = [140, 169, 196, 223, 253, 282, 310, 337, 366, 395].map(y => toY(y))
+
+const ASSISTANCE_COLS = {
+  date: 32,
+  recipient: 67,
+  disaster_type: 132,
+  assistance_type: 189,
+  unit: 245,
+  quantity: 274,
+  cost: 323,
+  provider: 359,
+}
+
 // ─── Display value reverse maps ─────────────────────────────────────────────
-const SHELTER_DISPLAY: Record<string, string> = {
-  partially_damaged: 'Partially Damaged',
-  totally_damaged:   'Totally Damaged',
-}
-const HOUSE_DISPLAY: Record<string, string> = {
-  owner: 'Owner', renter: 'Renter', sharer: 'Sharer',
-}
 const SEX_DISPLAY: Record<string, string> = {
   male: 'Male', female: 'Female',
 }
@@ -234,14 +238,6 @@ function drawCheckbox(
   })
 }
 
-function drawDebugPoint(page: PDFPage, x: number, y: number) {
-  page.drawCircle({
-    x,
-    y,
-    size: 2,
-    color: rgb(1, 0, 0),
-  })
-}
 
 // ─── Fill one card (left or right) ──────────────────────────────────────────
 async function fillCard(
@@ -260,9 +256,6 @@ async function fillCard(
     text: string,
     maxWidth = 200
     ) => {
-
-    // DEBUG RED DOT
-    drawDebugPoint(page, field.x + xOffset, field.y)
 
     // DRAW TEXT
     drawText(
@@ -425,19 +418,50 @@ export async function GET(
     await fillCard(page1, enrichedCard, RIGHT_OFFSET, font, fields as typeof FIELDS) // ← add 5th arg
 
     // 5. Fill page 2 (back - serial number only, assistance records filled manually)
-    const page2 = pdfDoc.getPages()[1]
-    const backSerialY = toY(54.9) // same y as front serial
-    const backSerialX_left  = 405
-    const backSerialX_right = 405 + RIGHT_OFFSET
+    // Replace the page 2 block with:
+    // ─── In your GET handler, replace the page 2 block with this: ─────────────────
 
-    page2.drawText(card.serial_number ?? '', {
-      x: backSerialX_left, y: backSerialY, size: 7,
-      font, color: rgb(0, 0, 0),
-    })
-    page2.drawText(card.serial_number ?? '', {
-      x: backSerialX_right, y: backSerialY, size: 7,
-      font, color: rgb(0, 0, 0),
-    })
+
+  // 5. Fill page 2 (back — serial number + assistance records)
+  const page2 = pdfDoc.getPages()[1]
+
+  // Serial numbers (both copies)
+  page2.drawText(card.serial_number ?? '', {
+    x: BACK_SERIAL_X, y: BACK_SERIAL_Y, size: 7, font, color: rgb(0, 0, 0),
+  })
+  page2.drawText(card.serial_number ?? '', {
+    x: BACK_SERIAL_X + RIGHT_OFFSET, y: BACK_SERIAL_Y, size: 7, font, color: rgb(0, 0, 0),
+  })
+
+  // Fetch assistance records
+  const { data: assistanceRecords } = await supabaseAdmin
+    .from('assistance_records')       // ← update to your actual table name if different
+    .select('*')
+    .eq('faced_card_id', card.id)
+    .order('assistance_date', { ascending: true })
+    .limit(ASSISTANCE_MAX_ROWS)
+
+  // Fill each row on both copies
+  assistanceRecords?.forEach((rec, i) => {
+    if (i >= ASSISTANCE_MAX_ROWS) return
+    const rowY = ASSISTANCE_ROWS[i]
+
+    // Helper to draw on both left and right copies
+    const both = (col: number, text: string, maxWidth = 60) => {
+      drawText(page2, text, col,               rowY, 6, font, maxWidth)
+      drawText(page2, text, col + RIGHT_OFFSET, rowY, 6, font, maxWidth)
+    }
+
+    both(ASSISTANCE_COLS.date,           rec.assistance_date           ?? '')
+    both(ASSISTANCE_COLS.recipient,      rec.receiving_family_member   ?? '')
+    both(ASSISTANCE_COLS.disaster_type,  rec.emergency_disaster_type   ?? '')
+    both(ASSISTANCE_COLS.assistance_type,rec.assistance_type           ?? '')
+    both(ASSISTANCE_COLS.unit,           rec.unit                      ?? '')
+    both(ASSISTANCE_COLS.quantity,       String(rec.quantity           ?? ''))
+    both(ASSISTANCE_COLS.cost,           String(rec.cost               ?? ''))
+    both(ASSISTANCE_COLS.provider,       rec.provider                  ?? '')
+  })
+
 
     // 6. Save and return PDF
     const pdfBytes = await pdfDoc.save()
