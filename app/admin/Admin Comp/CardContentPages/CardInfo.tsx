@@ -1,11 +1,24 @@
 import React from 'react'
 import { useFacedStore } from '@/app/store/useFacedStore'
+import { BiErrorCircle } from "react-icons/bi";
 
 function CardInfo() {
   const selectedCard = useFacedStore((s) => s.selectedCard);
 
+  console.log(selectedCard, "haha")
+
+  if (!selectedCard){
+    return(
+      <div className='h-full w-full p-2 flex justify-center items-center mt-10 gap-5 text-2xl text-gray-400'> 
+        <BiErrorCircle />
+        <h1>Please Select a FACED Card to view the details</h1>
+      </div>
+
+    )
+  }
+
   return (
-    <div className='h-full w-full p-2'>
+    <div className='w-full p-2 overflow-auto'>
       <div>
         <h2 className='rounded-2xl text-[0.9rem] w-[15%] p-1 text-center font-bold text-[#0F2F9A] bg-[#D5EDFF]'>LOCATION</h2>
 
@@ -64,7 +77,7 @@ function CardInfo() {
         <div className='grid grid-cols-4 p-1 w-full'>
           <div>
             <p className='text-gray-500 text-[0.7rem] font-bold'>AGE</p>
-            <p className='text-[0.8rem] text-[#0D1B4B] font-bold'>{selectedCard?.birthdate}</p>
+            <p className='text-[0.8rem] text-[#0D1B4B] font-bold'>{selectedCard?.age}</p>
           </div>
           <div>
             <p className='text-gray-500 text-[0.7rem] font-bold'>SEX</p>

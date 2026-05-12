@@ -3,11 +3,28 @@
 import { useState, useEffect } from "react";
 import { useFacedStore, FacedCard } from "@/app/store/useFacedStore";
 
-export default function FacedCardList() {
+interface Props {
+  selectedProvince: string | null;
+  searchQuery: string;
+}
+
+export default function FacedCardList({ selectedProvince, searchQuery }: Props) {
   const [cards, setCards] = useState<FacedCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+ const filteredCards = cards
+  .filter((card) => selectedProvince ? card.province === selectedProvince : true)
+  .filter((card) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      card.full_name.toLowerCase().includes(q) ||
+      card.serial_number.toLowerCase().includes(q) ||
+      card.barangay.toLowerCase().includes(q) ||
+      card.municipality.toLowerCase().includes(q)
+    );
+  });
+  
   const selectedCard = useFacedStore((s) => s.selectedCard);
   const setSelectedCard = useFacedStore((s) => s.setSelectedCard);
 
@@ -47,9 +64,20 @@ export default function FacedCardList() {
     );
   }
 
+    if (filteredCards.length === 0) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-gray-400">
+        <p className="text-sm font-semibold">No respondents found</p>
+        {selectedProvince && (
+          <p className="text-xs">in {selectedProvince}</p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-h-full overflow-auto flex flex-col gap-2">
-      {cards.map((card) => (
+      {filteredCards.map((card) => (
         <div
           key={card.id}
           onClick={() => setSelectedCard(card)}

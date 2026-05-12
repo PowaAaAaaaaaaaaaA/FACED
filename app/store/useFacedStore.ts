@@ -38,6 +38,7 @@ export type FacedCard = {
   name_extension: string;
   birthdate: string;
   birthplace: string;
+  age: number | null;
   sex: string;
   civil_status: string;
   mothers_maiden_name: string;

@@ -59,7 +59,7 @@ function CardContent() {
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto ">
         {activeTab === "card-info" && <CardInfo />}
         {activeTab === "family-members" && <FamilyMembers />}
         {activeTab === "assistance-record" && <AssistanceRecord />}
