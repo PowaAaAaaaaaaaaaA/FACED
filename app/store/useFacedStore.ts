@@ -14,6 +14,7 @@ export type FamilyMember = {
 export type FacedCard = {
   // Card identifiers
   id: string;
+  family_head_id: string;
   serial_number: string;
   date_registered: string;
   barangay_captain_name: string;
