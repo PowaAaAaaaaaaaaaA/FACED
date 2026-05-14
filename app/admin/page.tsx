@@ -1,0 +1,98 @@
+"use client";
+
+import React, { useState } from "react";
+import SegmentedButtons, { ActiveView } from "./Admin Comp/Toggle";
+import FacedCardList from "./Admin Comp/FacedCards";
+import PrintPanel from "./Admin Comp/PrintPanel";
+import CardContent from "./Admin Comp/CardContent";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+
+const PROVINCES = ["Bataan", "Bulacan", "Nueva Ecija", "Pampanga", "Tarlac", "Zambales", "Aurora"];
+
+function Page() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeView, setActiveView] = useState<ActiveView>("cards");
+  const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
+  };
+
+  const handleProvinceClick = (province: string) => {
+    setSelectedProvince((prev) => (prev === province ? null : province));
+  };
+
+  return (
+    <div className="overflow-hidden">
+      <div className="navbar bg-base-100 shadow-sm">
+        <div className="flex-1">
+          <a className="btn btn-ghost text-xl">FACED System</a>
+        </div>
+        <div className="flex-none gap-2">
+          <SegmentedButtons activeView={activeView} onChange={setActiveView} />
+          <button
+            onClick={handleLogout}
+            className="btn btn-ghost btn-sm text-error hover:bg-error hover:text-white gap-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Logout
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-5 flex px-5 items-center justify-between">
+        <label className="input w-[75%]">
+          <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <g strokeLinejoin="round" strokeLinecap="round" strokeWidth="2.5" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.3-4.3"></path>
+            </g>
+          </svg>
+          <input
+  type="search"
+  placeholder="Search"
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+/>
+        </label>
+        
+        <div>
+          <details className="dropdown">
+            <summary className="btn m-1">
+              {selectedProvince ? `Filter: ${selectedProvince}` : "Filter"}
+            </summary>
+            <ul className="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+              {PROVINCES.map((province) => (
+                <li key={province}>
+                  <button
+                    onClick={() => handleProvinceClick(province)}
+                    className={selectedProvince === province ? "active" : ""}
+                  >
+                    {province}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </details>
+          <button className="btn btn-soft btn-success">+ New Card</button>
+        </div>
+      </div>
+
+      <div className="flex p-4 gap-4 h-[calc(100vh-140px)] min-h-0">
+        <div className="w-[30%] overflow-auto flex flex-col gap-2 min-h-0">
+          <FacedCardList selectedProvince={selectedProvince} searchQuery={searchQuery} />
+        </div>
+        <div className="flex-1 bg-white rounded-lg shadow overflow-auto">
+          {activeView === "cards" ? <CardContent /> : <PrintPanel />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Page;
