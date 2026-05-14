@@ -6,6 +6,7 @@ export async function GET() {
     const { data: facedCards, error } = await supabaseAdmin.from("faced_cards")
       .select(`
         id,
+        family_head_id,
         serial_number,
         evacuation_center_site,
         house_ownership,
@@ -101,6 +102,7 @@ export async function GET() {
       return {
         // Card identifiers
         id: fc.id,
+        family_head_id: fc.family_head_id,
         serial_number: fc.serial_number,
         date_registered: fc.date_registered,
         barangay_captain_name: fc.barangay_captain_name,

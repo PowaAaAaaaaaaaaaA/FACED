@@ -7,6 +7,9 @@ import PrintPanel from "./Admin Comp/PrintPanel";
 import CardContent from "./Admin Comp/CardContent";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { Syne } from "next/font/google";
+
+const syne = Syne({ subsets: ["latin"] });
 
 const PROVINCES = ["Bataan", "Bulacan", "Nueva Ecija", "Pampanga", "Tarlac", "Zambales", "Aurora"];
 
@@ -27,11 +30,14 @@ function Page() {
 
   return (
     <div className="overflow-hidden">
+      <div className="w-full h-2 bg-gradient-to-r from-blue-900 via-blue-600 to-blue-400" />
       <div className="navbar bg-base-100 shadow-sm">
         <div className="flex-1">
-          <a className="btn btn-ghost text-xl">FACED System</a>
+          <a className="btn btn-ghost text-xl font-bold" style={syne.style}>
+            FACED System
+          </a>
         </div>
-        <div className="flex-none gap-2">
+        <div className="flex flex-none gap-2 items-center">
           <SegmentedButtons activeView={activeView} onChange={setActiveView} />
           <button
             onClick={handleLogout}
@@ -46,7 +52,7 @@ function Page() {
       </div>
 
       <div className="mt-5 flex px-5 items-center justify-between">
-        <label className="input w-[75%]">
+        <label className="input w-full">
           <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <g strokeLinejoin="round" strokeLinecap="round" strokeWidth="2.5" fill="none" stroke="currentColor">
               <circle cx="11" cy="11" r="8"></circle>
@@ -79,7 +85,6 @@ function Page() {
               ))}
             </ul>
           </details>
-          <button className="btn btn-soft btn-success">+ New Card</button>
         </div>
       </div>
 

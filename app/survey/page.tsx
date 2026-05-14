@@ -1222,7 +1222,7 @@ export default function SurveyPage() {
                     <div className="bg-green-100 rounded-full p-4">
                       <CheckCircle size={48} className="text-green-600" />
                     </div>
-                    <h2 className="text-xl font-bold text-green-700">Registration Successful!</h2>
+                    <h2 className="text-xl font-bold text-green-700">Form Submitted Successful!</h2>
                     <p className="text-sm text-slate-500">Matagumpay na naitala ang inyong pamilya.</p>
                   </div>
 
