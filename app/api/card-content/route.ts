@@ -1,12 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
-import { requireAdmin } from "@/lib/require-admin";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    const { response } = await requireAdmin(req);
-    if (response) return response;
-
     const { data: facedCards, error } = await supabaseAdmin.from("faced_cards")
       .select(`
         id,
@@ -69,7 +65,6 @@ export async function GET(req: NextRequest) {
           full_name,
           relation_to_head,
           birthdate,
-          age,
           sex,
           highest_educational_attainment,
           occupation,

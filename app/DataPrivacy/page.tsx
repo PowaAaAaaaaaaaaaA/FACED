@@ -13,19 +13,18 @@ export default function DataPrivacyPage() {
       <div className="w-full h-2 bg-gradient-to-r from-blue-900 via-blue-600 to-blue-400" />
 
       <header className="w-full bg-white border-b border-blue-100 shadow-sm py-4 px-4 sm:px-8">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-6">
-          <Image src="/dswd_logo.png" alt="DSWD Logo" width={220} height={60} className="w-40 sm:w-56 h-auto" />
+        <div className="max-w-5xl mx-auto flex flex-row flex-wrap justify-center items-center gap-4 sm:gap-6">
+          <Image src="/dswd_logo.png" alt="DSWD Logo" width={220} height={60} className="h-12 sm:h-14 w-auto" />
           <div className="hidden sm:block h-14 w-px bg-blue-200" />
-          <div className="block sm:hidden h-px w-16 bg-blue-200" />
-          <Image src="/bagong_pilipinas.png" alt="Bagong Pilipinas Logo" width={80} height={80} className="w-14 sm:w-20 h-auto" />
+          <Image src="/bagong_pilipinas.png" alt="Bagong Pilipinas Logo" width={80} height={80} className="h-12 sm:h-16 w-auto" />
         </div>
       </header>
 
       <main className="flex-1 flex items-center justify-center bg-[#F4F7FB] py-8 sm:py-16 px-4 sm:px-6">
-        <div className="bg-white rounded-2xl shadow-lg border border-blue-100 w-full max-w-xl p-6 sm:p-10 flex flex-col gap-4">
+        <div className="bg-white rounded-2xl shadow-lg border border-blue-100 w-full max-w-lg p-6 sm:p-10 flex flex-col gap-4">
 
           <div className="text-center">
-            <h2 className="text-blue-900 font-bold text-base sm:text-lg">Data Privacy Declaration</h2>
+            <h2 className="text-blue-900 font-bold text-lg">Data Privacy Declaration</h2>
             <p className="text-slate-500 text-sm mt-1">Please read the Data Privacy Declaration</p>
             <p className="text-slate-400 text-xs italic">Pakibasa ng mabuti ang Data Privacy Declaration</p>
           </div>
@@ -46,10 +45,10 @@ export default function DataPrivacyPage() {
             </p>
           </div>
 
-          <label className="flex justify-center items-center gap-2 label text-zinc-800 text-sm sm:text-md cursor-pointer">
+          <label className="flex justify-center items-center gap-2 label text-zinc-800 text-md cursor-pointer">
             <input
               type="checkbox"
-              className="checkbox checkbox-secondary checkbox-md shrink-0"
+              className="checkbox checkbox-secondary checkbox-md"
               checked={isChecked}
               onChange={() => setChecked((prev) => !prev)}
             />

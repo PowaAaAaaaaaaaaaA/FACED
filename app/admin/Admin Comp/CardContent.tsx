@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import CardInfo from "./CardContentPages/CardInfo";
 import FamilyMembers from "./CardContentPages/FamilyMembers";
 import AssistanceRecord from "./CardContentPages/AssistanceRecord";
@@ -12,6 +12,10 @@ function CardContent() {
   const [activeTab, setActiveTab] = useState<Tab>("card-info");
   const selectedCard = useFacedStore((s) => s.selectedCard);
 
+  
+
+  console.log(selectedCard)
+
   const tabs: { id: Tab; label: string }[] = [
     { id: "card-info", label: "Card Info" },
     { id: "family-members", label: "Family Members" },
@@ -19,11 +23,11 @@ function CardContent() {
   ];
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="">
       {/* Header */}
-      <div className="flex shrink-0 flex-col gap-2 rounded-t-[5px] bg-[#0D1B4B] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-        <div className="min-w-0 text-white">
-          <h2 className="truncate text-[0.9rem] font-semibold">
+      <div className="bg-[#0D1B4B] flex items-center h-[10%] rounded-t-[5px] p-5 justify-between">
+        <div className="text-white">
+          <h2 className="text-[0.9rem] font-semibold">
             {selectedCard?.full_name ?? "—"}
           </h2>
           <p className="text-[0.75rem] text-gray-300">
@@ -31,7 +35,7 @@ function CardContent() {
             {selectedCard?.family_member_count} member(s)
           </p>
         </div>
-        <p className="shrink-0 text-left text-[0.75rem] text-gray-300 sm:text-right">
+        <p className="text-[0.75rem] text-gray-300 text-right">
           Serial No.
           <br />
           {selectedCard?.serial_number ?? "—"}
@@ -39,8 +43,8 @@ function CardContent() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="shrink-0 border-b-2 border-gray-300">
-        <ul className="menu menu-horizontal flex-nowrap overflow-x-auto bg-base-200">
+      <div className="border-b-2 border-gray-400">
+        <ul className="menu menu-vertical lg:menu-horizontal bg-base-200 rounded-box">
           {tabs.map((tab) => (
             <li key={tab.id}>
               <a
@@ -55,7 +59,7 @@ function CardContent() {
       </div>
 
       {/* Tab Content */}
-      <div className="min-h-0 flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto ">
         {activeTab === "card-info" && <CardInfo />}
         {activeTab === "family-members" && <FamilyMembers />}
         {activeTab === "assistance-record" && <AssistanceRecord />}

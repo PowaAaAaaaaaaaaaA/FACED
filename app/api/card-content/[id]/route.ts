@@ -1,25 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
-import { requireAdmin } from "@/lib/require-admin";
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { response } = await requireAdmin(req);
-    if (response) return response;
+    const fields = await req.json();
 
-    const body = await req.json();
-    const { id, ...fields } = body;
+    const { id } = await params; // ✅ THIS IS THE FIX
 
     if (!id) {
       return NextResponse.json(
-        { success: false, error: "Card id required" },
+        { success: false, error: "Missing ID" },
         { status: 400 }
       );
     }
 
+    // ── 1. faced_cards ─────────────────────────────
     const cardFields: Record<string, unknown> = {};
     for (const key of [
       "evacuation_center_site",
@@ -31,10 +29,10 @@ export async function PATCH(
       "date_registered",
       "barangay_captain_name",
       "lswdo_name",
-    ];
-
-    for (const key of cardKeys) {
-      if (key in fields) cardFields[key] = fields[key];
+    ]) {
+      if (key in fields) {
+        cardFields[key] = fields[key];
+      }
     }
 
     if (Object.keys(cardFields).length > 0) {
@@ -46,6 +44,7 @@ export async function PATCH(
       if (error) throw new Error(`faced_cards: ${error.message}`);
     }
 
+    // ── 2. family_heads ─────────────────────────────
     const headFields: Record<string, unknown> = {};
     for (const key of [
       "last_name",
@@ -66,20 +65,13 @@ export async function PATCH(
       "contact_primary",
       "contact_alternate",
       "permanent_address",
-    ];
-
-    for (const key of headKeys) {
-      if (key in fields) headFields[key] = fields[key];
+    ]) {
+      if (key in fields) {
+        headFields[key] = fields[key];
+      }
     }
 
     if (Object.keys(headFields).length > 0) {
-      if (!fields.family_head_id) {
-        return NextResponse.json(
-          { success: false, error: "Family head id required" },
-          { status: 400 }
-        );
-      }
-
       const { error } = await supabaseAdmin
         .from("family_heads")
         .update(headFields)
@@ -88,6 +80,7 @@ export async function PATCH(
       if (error) throw new Error(`family_heads: ${error.message}`);
     }
 
+    // ── 3. account_info ────────────────────────────
     const accountFields: Record<string, unknown> = {};
     for (const key of [
       "payment_channel",
@@ -98,35 +91,25 @@ export async function PATCH(
       "account_name",
       "account_type",
       "account_number",
-    ];
-
-    for (const key of accountKeys) {
-      if (key in fields) accountFields[key] = fields[key];
+    ]) {
+      if (key in fields) {
+        accountFields[key] = fields[key];
+      }
     }
 
     if (Object.keys(accountFields).length > 0) {
-      if (!fields.family_head_id) {
-        return NextResponse.json(
-          { success: false, error: "Family head id required" },
-          { status: 400 }
-        );
-      }
-
       const { data: head, error: headErr } = await supabaseAdmin
         .from("family_heads")
-        .select("account_id")
+        .select("id")
         .eq("id", fields.family_head_id)
         .single();
 
       if (headErr) throw new Error(`family_heads lookup: ${headErr.message}`);
-      if (!head?.account_id) {
-        throw new Error("family_heads lookup: account_id missing");
-      }
 
       const { error } = await supabaseAdmin
         .from("account_info")
         .update(accountFields)
-        .eq("id", head.account_id);
+        .eq("family_head_id", head.id);
 
       if (error) throw new Error(`account_info: ${error.message}`);
     }

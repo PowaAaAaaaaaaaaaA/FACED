@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 export type ActiveView = "cards" | "print";
 
 interface SegmentedButtonsProps {
@@ -9,9 +11,9 @@ interface SegmentedButtonsProps {
 
 function SegmentedButtons({ activeView, onChange }: SegmentedButtonsProps) {
   return (
-    <div className="join rounded-2xl bg-gray-200">
+    <div className="join bg-gray-200 rounded-2xl gap-2">
       <input
-        className="join-item btn btn-xs rounded-2xl sm:btn-sm"
+        className="join-item btn rounded-2xl"
         type="radio"
         name="options"
         aria-label="Card Records"
@@ -19,7 +21,7 @@ function SegmentedButtons({ activeView, onChange }: SegmentedButtonsProps) {
         onChange={() => onChange("cards")}
       />
       <input
-        className="join-item btn btn-xs rounded-2xl sm:btn-sm"
+        className="join-item btn rounded-2xl"
         type="radio"
         name="options"
         aria-label="Print to PDF"

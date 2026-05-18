@@ -34,7 +34,8 @@ export default function Home() {
       return
     }
 
-    router.replace('/admin')
+    // Redirect to dashboard on success
+    router.push('/admin')
   }
 
   return (
