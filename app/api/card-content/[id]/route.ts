@@ -1,18 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 
-export async function PATCH(req: NextRequest) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const body = await req.json();
-    const { id, ...fields } = body;
+    const fields = await req.json();
+
+    const { id } = await params; // ✅ THIS IS THE FIX
 
     if (!id) {
-      return NextResponse.json({ success: false, error: "Card id required" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Missing ID" },
+        { status: 400 }
+      );
     }
 
-    // ── 1. faced_cards fields ─────────────────────────────────────────────
+    // ── 1. faced_cards ─────────────────────────────
     const cardFields: Record<string, unknown> = {};
-    const cardKeys = [
+    for (const key of [
       "evacuation_center_site",
       "house_ownership",
       "shelter_damage",
@@ -22,9 +29,10 @@ export async function PATCH(req: NextRequest) {
       "date_registered",
       "barangay_captain_name",
       "lswdo_name",
-    ];
-    for (const key of cardKeys) {
-      if (key in fields) cardFields[key] = fields[key];
+    ]) {
+      if (key in fields) {
+        cardFields[key] = fields[key];
+      }
     }
 
     if (Object.keys(cardFields).length > 0) {
@@ -32,12 +40,13 @@ export async function PATCH(req: NextRequest) {
         .from("faced_cards")
         .update(cardFields)
         .eq("id", id);
+
       if (error) throw new Error(`faced_cards: ${error.message}`);
     }
 
-    // ── 2. family_heads fields ────────────────────────────────────────────
+    // ── 2. family_heads ─────────────────────────────
     const headFields: Record<string, unknown> = {};
-    const headKeys = [
+    for (const key of [
       "last_name",
       "first_name",
       "middle_name",
@@ -56,22 +65,24 @@ export async function PATCH(req: NextRequest) {
       "contact_primary",
       "contact_alternate",
       "permanent_address",
-    ];
-    for (const key of headKeys) {
-      if (key in fields) headFields[key] = fields[key];
+    ]) {
+      if (key in fields) {
+        headFields[key] = fields[key];
+      }
     }
 
     if (Object.keys(headFields).length > 0) {
-    const { error } = await supabaseAdmin
+      const { error } = await supabaseAdmin
         .from("family_heads")
         .update(headFields)
-        .eq("id", fields.family_head_id); // ← was .eq("faced_card_id", id)
-    if (error) throw new Error(`family_heads: ${error.message}`);
+        .eq("id", fields.family_head_id);
+
+      if (error) throw new Error(`family_heads: ${error.message}`);
     }
 
-    // ── 3. account_info fields ────────────────────────────────────────────
+    // ── 3. account_info ────────────────────────────
     const accountFields: Record<string, unknown> = {};
-    const accountKeys = [
+    for (const key of [
       "payment_channel",
       "bank_name",
       "ewallet_name",
@@ -80,30 +91,50 @@ export async function PATCH(req: NextRequest) {
       "account_name",
       "account_type",
       "account_number",
-    ];
-    for (const key of accountKeys) {
-      if (key in fields) accountFields[key] = fields[key];
+    ]) {
+      if (key in fields) {
+        accountFields[key] = fields[key];
+      }
     }
 
     if (Object.keys(accountFields).length > 0) {
-      // account_info is linked via family_heads → get the head id first
       const { data: head, error: headErr } = await supabaseAdmin
         .from("family_heads")
         .select("id")
-        .eq("id", fields.family_head_id) // ← was .eq("faced_card_id", id)
+        .eq("id", fields.family_head_id)
         .single();
+
       if (headErr) throw new Error(`family_heads lookup: ${headErr.message}`);
 
       const { error } = await supabaseAdmin
         .from("account_info")
         .update(accountFields)
         .eq("family_head_id", head.id);
+
       if (error) throw new Error(`account_info: ${error.message}`);
     }
 
-    return NextResponse.json({ success: true });
+    // ── 4. Re-fetch updated card ───────────────────
+    const { data: facedCard, error: fetchError } = await supabaseAdmin
+      .from("faced_cards")
+      .select(`*`)
+      .eq("id", id)
+      .single();
+
+    if (fetchError) throw new Error(fetchError.message);
+
+    return NextResponse.json({
+      success: true,
+      ...facedCard,
+    });
+
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : JSON.stringify(error);
-    return NextResponse.json({ success: false, error: msg }, { status: 500 });
+    const msg =
+      error instanceof Error ? error.message : String(error);
+
+    return NextResponse.json(
+      { success: false, error: msg },
+      { status: 500 }
+    );
   }
 }
