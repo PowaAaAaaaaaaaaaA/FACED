@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useFacedStore, FacedCard } from "@/app/store/useFacedStore";
+import { useFacedStore } from "@/app/store/useFacedStore";
 
 interface Props {
   selectedProvince: string | null;
@@ -9,9 +9,10 @@ interface Props {
 }
 
 export default function FacedCardList({ selectedProvince, searchQuery }: Props) {
-  const [cards, setCards] = useState<FacedCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const cards = useFacedStore((s) => s.cards);
+  const setCards = useFacedStore((s) => s.setCards);
 
  const filteredCards = cards
   .filter((card) => selectedProvince ? card.province === selectedProvince : true)
@@ -33,7 +34,6 @@ export default function FacedCardList({ selectedProvince, searchQuery }: Props) 
       try {
         const res = await fetch("/api/card-content");
         const data = await res.json();
-        console.log("API raw:", data.cards[0])
         if (!data.success) throw new Error(data.error);
         setCards(data.cards);
       } catch (err) {
@@ -44,7 +44,7 @@ export default function FacedCardList({ selectedProvince, searchQuery }: Props) 
     }
 
     fetchCards();
-  }, []);
+  }, [setCards]);
 
   if (loading) {
     return (

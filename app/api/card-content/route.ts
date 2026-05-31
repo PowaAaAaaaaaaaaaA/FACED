@@ -65,6 +65,7 @@ export async function GET() {
           full_name,
           relation_to_head,
           birthdate,
+          age,
           sex,
           highest_educational_attainment,
           occupation,

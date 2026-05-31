@@ -1,25 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(req: NextRequest) {
   try {
-    const fields = await req.json();
-
-    const { id } = await params; // ✅ THIS IS THE FIX
+    const body = await req.json();
+    const { id, ...fields } = body;
 
     if (!id) {
       return NextResponse.json(
-        { success: false, error: "Missing ID" },
+        { success: false, error: "Card id required" },
         { status: 400 }
       );
     }
 
-    // ── 1. faced_cards ─────────────────────────────
     const cardFields: Record<string, unknown> = {};
-    for (const key of [
+    const cardKeys = [
       "evacuation_center_site",
       "house_ownership",
       "shelter_damage",
@@ -29,10 +24,10 @@ export async function PATCH(
       "date_registered",
       "barangay_captain_name",
       "lswdo_name",
-    ]) {
-      if (key in fields) {
-        cardFields[key] = fields[key];
-      }
+    ];
+
+    for (const key of cardKeys) {
+      if (key in fields) cardFields[key] = fields[key];
     }
 
     if (Object.keys(cardFields).length > 0) {
@@ -44,9 +39,8 @@ export async function PATCH(
       if (error) throw new Error(`faced_cards: ${error.message}`);
     }
 
-    // ── 2. family_heads ─────────────────────────────
     const headFields: Record<string, unknown> = {};
-    for (const key of [
+    const headKeys = [
       "last_name",
       "first_name",
       "middle_name",
@@ -65,13 +59,20 @@ export async function PATCH(
       "contact_primary",
       "contact_alternate",
       "permanent_address",
-    ]) {
-      if (key in fields) {
-        headFields[key] = fields[key];
-      }
+    ];
+
+    for (const key of headKeys) {
+      if (key in fields) headFields[key] = fields[key];
     }
 
     if (Object.keys(headFields).length > 0) {
+      if (!fields.family_head_id) {
+        return NextResponse.json(
+          { success: false, error: "Family head id required" },
+          { status: 400 }
+        );
+      }
+
       const { error } = await supabaseAdmin
         .from("family_heads")
         .update(headFields)
@@ -80,9 +81,8 @@ export async function PATCH(
       if (error) throw new Error(`family_heads: ${error.message}`);
     }
 
-    // ── 3. account_info ────────────────────────────
     const accountFields: Record<string, unknown> = {};
-    for (const key of [
+    const accountKeys = [
       "payment_channel",
       "bank_name",
       "ewallet_name",
@@ -91,50 +91,42 @@ export async function PATCH(
       "account_name",
       "account_type",
       "account_number",
-    ]) {
-      if (key in fields) {
-        accountFields[key] = fields[key];
-      }
+    ];
+
+    for (const key of accountKeys) {
+      if (key in fields) accountFields[key] = fields[key];
     }
 
     if (Object.keys(accountFields).length > 0) {
+      if (!fields.family_head_id) {
+        return NextResponse.json(
+          { success: false, error: "Family head id required" },
+          { status: 400 }
+        );
+      }
+
       const { data: head, error: headErr } = await supabaseAdmin
         .from("family_heads")
-        .select("id")
+        .select("account_id")
         .eq("id", fields.family_head_id)
         .single();
 
       if (headErr) throw new Error(`family_heads lookup: ${headErr.message}`);
+      if (!head?.account_id) {
+        throw new Error("family_heads lookup: account_id missing");
+      }
 
       const { error } = await supabaseAdmin
         .from("account_info")
         .update(accountFields)
-        .eq("family_head_id", head.id);
+        .eq("id", head.account_id);
 
       if (error) throw new Error(`account_info: ${error.message}`);
     }
 
-    // ── 4. Re-fetch updated card ───────────────────
-    const { data: facedCard, error: fetchError } = await supabaseAdmin
-      .from("faced_cards")
-      .select(`*`)
-      .eq("id", id)
-      .single();
-
-    if (fetchError) throw new Error(fetchError.message);
-
-    return NextResponse.json({
-      success: true,
-      ...facedCard,
-    });
-
+    return NextResponse.json({ success: true });
   } catch (error: unknown) {
-    const msg =
-      error instanceof Error ? error.message : String(error);
-
-    return NextResponse.json(
-      { success: false, error: msg },
-      { status: 500 }
-    );
+    const msg = error instanceof Error ? error.message : JSON.stringify(error);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
