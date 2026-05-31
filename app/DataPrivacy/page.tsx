@@ -12,24 +12,25 @@ export default function DataPrivacyPage() {
     <div className="flex flex-col min-h-screen font-sans bg-white">
       <div className="w-full h-2 bg-gradient-to-r from-blue-900 via-blue-600 to-blue-400" />
 
-      <header className="w-full bg-white border-b border-blue-100 shadow-sm py-4 px-8">
-        <div className="max-w-5xl mx-auto flex flex-row justify-center items-center gap-6">
-          <Image src="/dswd_logo.png" alt="DSWD Logo" width={220} height={60} />
-          <div className="h-14 w-px bg-blue-200" />
-          <Image src="/bagong_pilipinas.png" alt="Bagong Pilipinas Logo" width={80} height={80} />
+      <header className="w-full bg-white border-b border-blue-100 shadow-sm py-4 px-4 sm:px-8">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-6">
+          <Image src="/dswd_logo.png" alt="DSWD Logo" width={220} height={60} className="w-40 sm:w-56 h-auto" />
+          <div className="hidden sm:block h-14 w-px bg-blue-200" />
+          <div className="block sm:hidden h-px w-16 bg-blue-200" />
+          <Image src="/bagong_pilipinas.png" alt="Bagong Pilipinas Logo" width={80} height={80} className="w-14 sm:w-20 h-auto" />
         </div>
       </header>
 
-      <main className="flex-1 flex items-center justify-center bg-[#F4F7FB] py-16 px-6">
-        <div className="bg-white rounded-2xl shadow-lg border border-blue-100 w-full max-w-[50%] p-10 flex flex-col gap-4">
+      <main className="flex-1 flex items-center justify-center bg-[#F4F7FB] py-8 sm:py-16 px-4 sm:px-6">
+        <div className="bg-white rounded-2xl shadow-lg border border-blue-100 w-full max-w-xl p-6 sm:p-10 flex flex-col gap-4">
 
           <div className="text-center">
-            <h2 className="text-blue-900 font-bold text-lg">Data Privacy Declaration</h2>
+            <h2 className="text-blue-900 font-bold text-base sm:text-lg">Data Privacy Declaration</h2>
             <p className="text-slate-500 text-sm mt-1">Please read the Data Privacy Declaration</p>
             <p className="text-slate-400 text-xs italic">Pakibasa ng mabuti ang Data Privacy Declaration</p>
           </div>
 
-          <div className="h-72 overflow-y-auto border border-blue-100 rounded-xl bg-[#F8FAFD] px-5 py-4 flex flex-col gap-4 text-sm scroll-smooth">
+          <div className="h-56 sm:h-72 overflow-y-auto border border-blue-100 rounded-xl bg-[#F8FAFD] px-4 sm:px-5 py-4 flex flex-col gap-4 text-sm scroll-smooth">
             <p className="text-zinc-900 text-pretty">
               All data and information indicated herein shall be used for identification
               purposes for the implementation of disaster risk reduction and management
@@ -45,10 +46,10 @@ export default function DataPrivacyPage() {
             </p>
           </div>
 
-          <label className="flex justify-center items-center gap-2 label text-zinc-800 text-md cursor-pointer">
+          <label className="flex justify-center items-center gap-2 label text-zinc-800 text-sm sm:text-md cursor-pointer">
             <input
               type="checkbox"
-              className="checkbox checkbox-secondary checkbox-md"
+              className="checkbox checkbox-secondary checkbox-md shrink-0"
               checked={isChecked}
               onChange={() => setChecked((prev) => !prev)}
             />
@@ -82,7 +83,7 @@ export default function DataPrivacyPage() {
         </div>
       </main>
 
-      <footer className="w-full bg-gradient-to-b from-blue-950 via-blue-850 to-blue-800 text-blue-200 text-center py-5 px-8 text-xs">
+      <footer className="w-full bg-gradient-to-b from-blue-950 via-blue-850 to-blue-800 text-blue-200 text-center py-5 px-4 sm:px-8 text-xs">
         <p className="font-semibold text-white text-sm">Republic of the Philippines</p>
         <p className="mt-1">Department of Social Welfare and Development — FACED Digital System</p>
         <p className="mt-1 text-blue-400">All rights reserved © {new Date().getFullYear()}</p>
