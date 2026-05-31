@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAdmin } from "@/lib/require-admin";
 
-export async function PATCH(req: NextRequest) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const { response } = await requireAdmin(req);
     if (response) return response;
@@ -18,7 +21,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const cardFields: Record<string, unknown> = {};
-    const cardKeys = [
+    for (const key of [
       "evacuation_center_site",
       "house_ownership",
       "shelter_damage",
@@ -44,7 +47,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const headFields: Record<string, unknown> = {};
-    const headKeys = [
+    for (const key of [
       "last_name",
       "first_name",
       "middle_name",
@@ -86,7 +89,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const accountFields: Record<string, unknown> = {};
-    const accountKeys = [
+    for (const key of [
       "payment_channel",
       "bank_name",
       "ewallet_name",
@@ -128,9 +131,27 @@ export async function PATCH(req: NextRequest) {
       if (error) throw new Error(`account_info: ${error.message}`);
     }
 
-    return NextResponse.json({ success: true });
+    // ── 4. Re-fetch updated card ───────────────────
+    const { data: facedCard, error: fetchError } = await supabaseAdmin
+      .from("faced_cards")
+      .select(`*`)
+      .eq("id", id)
+      .single();
+
+    if (fetchError) throw new Error(fetchError.message);
+
+    return NextResponse.json({
+      success: true,
+      ...facedCard,
+    });
+
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : JSON.stringify(error);
-    return NextResponse.json({ success: false, error: msg }, { status: 500 });
+    const msg =
+      error instanceof Error ? error.message : String(error);
+
+    return NextResponse.json(
+      { success: false, error: msg },
+      { status: 500 }
+    );
   }
 }
