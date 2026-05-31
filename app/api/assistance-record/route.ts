@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAdmin } from "@/lib/require-admin";
 
 export type AssistanceRecordInput = {
   id?: string; // present for existing records
@@ -23,6 +24,9 @@ const normalize = (dateStr: string) => {
 
 // ─── GET ─────────────────────────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
+  const { response } = await requireAdmin(req);
+  if (response) return response;
+
   const { searchParams } = new URL(req.url);
   const faced_card_id = searchParams.get("faced_card_id");
 
@@ -50,11 +54,14 @@ export async function GET(req: NextRequest) {
 }
 
 // ─── POST ────────────────────────────────────────────────────────────────────
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const { response } = await requireAdmin(req);
+    if (response) return response;
+
     const body: AssistanceRecordInput[] = await req.json();
 
-    if (!Array.isArray(body) || body.length === 0) {
+   if (!Array.isArray(body) || body.length === 0) {
       return NextResponse.json(
         { success: false, error: "No records provided." },
         { status: 400 }
@@ -137,6 +144,9 @@ export async function POST(req: Request) {
 // ─── DELETE ──────────────────────────────────────────────────────────────────
 export async function DELETE(req: NextRequest) {
   try {
+    const { response } = await requireAdmin(req);
+    if (response) return response;
+
     const { id } = await req.json()
 
     if (!id) {

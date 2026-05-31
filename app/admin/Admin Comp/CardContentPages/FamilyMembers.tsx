@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { FamilyMember, useFacedStore } from "@/app/store/useFacedStore";
+import { authFetch } from "@/lib/auth-fetch";
 import {
   EDUCATIONAL_ATTAINMENT,
   RELATION_FAMHEAD,
@@ -134,7 +135,7 @@ function FamilyMembers() {
 
     if (row.id) {
       try {
-        const res = await fetch("/api/family-members", {
+        const res = await authFetch("/api/family-members", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: row.id }),
@@ -184,7 +185,7 @@ function FamilyMembers() {
             : row.type_of_vulnerability || null,
       }));
 
-      const res = await fetch("/api/family-members", {
+      const res = await authFetch("/api/family-members", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

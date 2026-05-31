@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useFacedStore } from "@/app/store/useFacedStore";
+import { authFetch } from "@/lib/auth-fetch";
 
 interface Props {
   selectedProvince: string | null;
@@ -32,7 +33,7 @@ export default function FacedCardList({ selectedProvince, searchQuery }: Props) 
   useEffect(() => {
     async function fetchCards() {
       try {
-        const res = await fetch("/api/card-content");
+        const res = await authFetch("/api/card-content");
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
         setCards(data.cards);

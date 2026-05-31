@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAdmin } from "@/lib/require-admin";
 
 type FamilyMemberInput = {
   id?: string;
@@ -29,6 +30,9 @@ const toDbRow = (member: FamilyMemberInput) => ({
 
 export async function POST(req: NextRequest) {
   try {
+    const { response } = await requireAdmin(req);
+    if (response) return response;
+    
     const body: FamilyMemberInput[] = await req.json();
 
     if (!Array.isArray(body)) {
@@ -82,6 +86,9 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    const { response } = await requireAdmin(req);
+    if (response) return response;
+
     const { id } = await req.json();
 
     if (!id) {

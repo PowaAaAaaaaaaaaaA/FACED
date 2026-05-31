@@ -21,7 +21,8 @@ function Page() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push("/");
+    router.replace("/");
+    router.refresh();
   };
 
   const handleProvinceClick = (province: string) => {

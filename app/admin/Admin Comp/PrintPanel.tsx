@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useFacedStore } from '@/app/store/useFacedStore'
 import { Printer } from 'lucide-react'
+import { authFetch } from '@/lib/auth-fetch'
 
 export default function PrintPanel() {
   const selectedCard = useFacedStore((s) => s.selectedCard)
@@ -14,7 +15,7 @@ export default function PrintPanel() {
     setLoading(true)
 
     // Prevent browser cache
-    const res = await fetch(
+    const res = await authFetch(
       `/api/generate-pdf/${selectedCard.id}?t=${Date.now()}`
     )
 
@@ -66,15 +67,10 @@ export default function PrintPanel() {
 
           <button
             className="btn btn-sm flex-1 bg-[#f4f5ff] text-[#0D1B4B] hover:bg-[#0f2a81] hover:text-white sm:flex-none"
-            onClick={() =>
-              window.open(
-                `/api/generate-pdf/${selectedCard.id}`,
-                '_blank'
-              )
-            }
+            onClick={handlePreview}
           >
             <Printer size={14} />
-            Print / Save PDF
+            Load PDF
           </button>
         </div>
       </div>

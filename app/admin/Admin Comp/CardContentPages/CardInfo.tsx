@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BiErrorCircle } from "react-icons/bi";
 import { FacedCard, useFacedStore } from "@/app/store/useFacedStore";
-
+import { authFetch } from "@/lib/auth-fetch";
 import {
   ACCOUNT_TYPE_OPTIONS,
   BANK_EWALLET_OPTIONS,
@@ -299,7 +299,7 @@ function CardInfo() {
     };
 
     try {
-      const res = await fetch(`/api/card-content/${selectedCard.id}`, {
+      const res = await authFetch(`/api/card-content/${selectedCard.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

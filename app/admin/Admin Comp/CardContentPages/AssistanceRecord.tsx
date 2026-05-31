@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useFacedStore } from "@/app/store/useFacedStore";
+import { authFetch } from "@/lib/auth-fetch";
 
 type AssistanceRow = {
   id?: string;
@@ -56,7 +57,7 @@ function AssistanceRecords() {
     setSubmitError(null);
     setSubmitSuccess(false);
     try {
-      const res = await fetch(`/api/assistance-record?faced_card_id=${selectedCard.id}`);
+      const res = await authFetch(`/api/assistance-record?faced_card_id=${selectedCard.id}`);
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error ?? "Failed to load records.");
 
@@ -107,7 +108,7 @@ function AssistanceRecords() {
 
     if (row.id) {
       try {
-        const res = await fetch("/api/assistance-record", {
+        const res = await authFetch("/api/assistance-record", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: row.id }),
@@ -171,7 +172,7 @@ function AssistanceRecords() {
         recorded_by: null,
       }));
 
-      const res = await fetch("/api/assistance-record", {
+      const res = await authFetch("/api/assistance-record", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
