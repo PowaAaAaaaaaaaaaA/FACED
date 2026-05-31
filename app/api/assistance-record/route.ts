@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAdmin } from "@/lib/require-admin";
 
 export type AssistanceRecordInput = {
   id?: string; // present for existing records
@@ -12,7 +13,7 @@ export type AssistanceRecordInput = {
   quantity: number | null;
   cost: number | null;
   provider: string;
-  recorded_by: string;
+  recorded_by: string | null;
 };
 
 const normalize = (dateStr: string) => {
@@ -23,11 +24,17 @@ const normalize = (dateStr: string) => {
 
 // ─── GET ─────────────────────────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
+  const { response } = await requireAdmin(req);
+  if (response) return response;
+
   const { searchParams } = new URL(req.url);
   const faced_card_id = searchParams.get("faced_card_id");
 
   if (!faced_card_id) {
-    return NextResponse.json({ error: "faced_card_id required" }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: "faced_card_id required" },
+      { status: 400 }
+    );
   }
 
   const { data, error } = await supabaseAdmin
@@ -36,14 +43,22 @@ export async function GET(req: NextRequest) {
     .eq("faced_card_id", faced_card_id)
     .order("assistance_date", { ascending: true });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
 
-  return NextResponse.json({ records: data ?? [] });
+  return NextResponse.json({ success: true, records: data ?? [] });
 }
 
 // ─── POST ────────────────────────────────────────────────────────────────────
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const { response } = await requireAdmin(req);
+    if (response) return response;
+
     const body: AssistanceRecordInput[] = await req.json();
 
     if (!Array.isArray(body) || body.length === 0) {
@@ -129,10 +144,16 @@ export async function POST(req: Request) {
 // ─── DELETE ──────────────────────────────────────────────────────────────────
 export async function DELETE(req: NextRequest) {
   try {
+    const { response } = await requireAdmin(req);
+    if (response) return response;
+
     const { id } = await req.json()
 
     if (!id) {
-      return NextResponse.json({ error: "id required" }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: "id required" },
+        { status: 400 }
+      )
     }
 
     const { error } = await supabaseAdmin

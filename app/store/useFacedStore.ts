@@ -5,6 +5,7 @@ export type FamilyMember = {
   full_name: string;
   relation_to_head: string;
   birthdate: string;
+  age: number | null;
   sex: string;
   highest_educational_attainment: string;
   occupation: string;
@@ -70,11 +71,59 @@ export type FacedCard = {
 };
 
 interface FacedStore {
+  cards: FacedCard[];
   selectedCard: FacedCard | null;
+  setCards: (cards: FacedCard[]) => void;
   setSelectedCard: (card: FacedCard) => void;
+  updateSelectedCard: (updates: Partial<FacedCard>) => void;
+  updateSelectedCardFamilyMembers: (familyMembers: FamilyMember[]) => void;
 }
 
 export const useFacedStore = create<FacedStore>((set) => ({
+  cards: [],
   selectedCard: null,
+  setCards: (cards) => set({ cards }),
   setSelectedCard: (card) => set({ selectedCard: card }),
+  updateSelectedCard: (updates) =>
+    set((state) => {
+      if (!state.selectedCard) return state;
+
+      const updatedCard = {
+        ...state.selectedCard,
+        ...updates,
+      };
+
+      updatedCard.full_name = [
+        updatedCard.last_name,
+        updatedCard.first_name,
+        updatedCard.middle_name,
+      ]
+        .filter(Boolean)
+        .join(", ")
+        .toUpperCase();
+
+      return {
+        selectedCard: updatedCard,
+        cards: state.cards.map((card) =>
+          card.id === updatedCard.id ? updatedCard : card
+        ),
+      };
+    }),
+  updateSelectedCardFamilyMembers: (familyMembers) =>
+    set((state) => {
+      if (!state.selectedCard) return state;
+
+      const updatedCard = {
+        ...state.selectedCard,
+        family_member_count: familyMembers.length,
+        family_members: familyMembers,
+      };
+
+      return {
+        selectedCard: updatedCard,
+        cards: state.cards.map((card) =>
+          card.id === updatedCard.id ? updatedCard : card
+        ),
+      };
+    }),
 }));

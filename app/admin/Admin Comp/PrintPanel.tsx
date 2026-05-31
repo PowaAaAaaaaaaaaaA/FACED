@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useFacedStore } from '@/app/store/useFacedStore'
 import { Printer } from 'lucide-react'
+import { authFetch } from '@/lib/auth-fetch'
 
 export default function PrintPanel() {
   const selectedCard = useFacedStore((s) => s.selectedCard)
@@ -14,7 +15,7 @@ export default function PrintPanel() {
     setLoading(true)
 
     // Prevent browser cache
-    const res = await fetch(
+    const res = await authFetch(
       `/api/generate-pdf/${selectedCard.id}?t=${Date.now()}`
     )
 
@@ -43,17 +44,17 @@ export default function PrintPanel() {
     <div className="flex flex-col h-full min-h-0">
       
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b shrink-0 bg-[#0D1B4B]">
-        <div>
-          <p className="text-md font-semibold text-white">{selectedCard.full_name}</p>
+      <div className="flex shrink-0 flex-col gap-3 border-b bg-[#0D1B4B] p-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-white sm:text-md">{selectedCard.full_name}</p>
           <p className="text-xs text-gray-400">
             {selectedCard.serial_number}
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
-            className="btn btn-sm btn-outline btn-warning"
+            className="btn btn-sm btn-outline btn-warning flex-1 sm:flex-none"
             onClick={handlePreview}
             disabled={loading}
           >
@@ -65,16 +66,11 @@ export default function PrintPanel() {
           </button>
 
           <button
-            className="btn btn-sm bg-[#f4f5ff] text-[#0D1B4B] hover:bg-[#0f2a81] hover:text-white"
-            onClick={() =>
-              window.open(
-                `/api/generate-pdf/${selectedCard.id}`,
-                '_blank'
-              )
-            }
+            className="btn btn-sm flex-1 bg-[#f4f5ff] text-[#0D1B4B] hover:bg-[#0f2a81] hover:text-white sm:flex-none"
+            onClick={handlePreview}
           >
             <Printer size={14} />
-            Print / Save PDF
+            Load PDF
           </button>
         </div>
       </div>

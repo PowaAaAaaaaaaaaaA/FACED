@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useFacedStore } from "@/app/store/useFacedStore";
+import { authFetch } from "@/lib/auth-fetch";
 
 type AssistanceRow = {
   id?: string;
+  tempId: string;
   assistance_date: string;
   receiving_family_member: string;
   emergency_disaster_type: string;
@@ -16,6 +18,7 @@ type AssistanceRow = {
 };
 
 const emptyRow = (): AssistanceRow => ({
+  tempId: crypto.randomUUID(),
   assistance_date: "",
   receiving_family_member: "",
   emergency_disaster_type: "",
@@ -25,6 +28,18 @@ const emptyRow = (): AssistanceRow => ({
   cost: "",
   provider: "",
 });
+
+type AssistanceRecordResponse = {
+  id?: string;
+  assistance_date?: string | null;
+  receiving_family_member?: string | null;
+  emergency_disaster_type?: string | null;
+  assistance_type?: string | null;
+  unit?: string | null;
+  quantity?: number | string | null;
+  cost?: number | string | null;
+  provider?: string | null;
+};
 
 function AssistanceRecords() {
   const selectedCard = useFacedStore((s) => s.selectedCard);
@@ -42,18 +57,21 @@ function AssistanceRecords() {
     setSubmitError(null);
     setSubmitSuccess(false);
     try {
-      const res = await fetch(`/api/assistance-record?faced_card_id=${selectedCard.id}`);
+      const res = await authFetch(`/api/assistance-record?faced_card_id=${selectedCard.id}`);
       const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error ?? "Failed to load records.");
+
       if (data.records && data.records.length > 0) {
-        const mapped: AssistanceRow[] = data.records.map((rec: AssistanceRow) => ({
+        const mapped: AssistanceRow[] = data.records.map((rec: AssistanceRecordResponse) => ({
           id: rec.id,
+          tempId: rec.id ?? crypto.randomUUID(),
           assistance_date: rec.assistance_date ?? "",
           receiving_family_member: rec.receiving_family_member ?? "",
           emergency_disaster_type: rec.emergency_disaster_type ?? "",
           assistance_type: rec.assistance_type ?? "",
           unit: rec.unit ?? "",
-          quantity: rec.quantity ? String(rec.quantity) : "",
-          cost: rec.cost ? String(rec.cost) : "",
+          quantity: rec.quantity == null ? "" : String(rec.quantity),
+          cost: rec.cost == null ? "" : String(rec.cost),
           provider: rec.provider ?? "",
         }));
         setRows(mapped);
@@ -62,9 +80,10 @@ function AssistanceRecords() {
         setRows([emptyRow()]);
         setSavedRows([]);
       }
-    } catch {
+    } catch (err) {
       setRows([emptyRow()]);
       setSavedRows([]);
+      setSubmitError(err instanceof Error ? err.message : "Failed to load records.");
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +108,7 @@ function AssistanceRecords() {
 
     if (row.id) {
       try {
-        const res = await fetch("/api/assistance-record", {
+        const res = await authFetch("/api/assistance-record", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: row.id }),
@@ -118,7 +137,7 @@ function AssistanceRecords() {
     const original = savedRows.find((s) => s.id === row.id);
     if (!original) return true; // no snapshot found — treat as new
     return (Object.keys(row) as (keyof AssistanceRow)[]).some(
-      (key) => row[key] !== original[key]
+      (key) => key !== "tempId" && row[key] !== original[key]
     );
   };
 
@@ -153,14 +172,16 @@ function AssistanceRecords() {
         recorded_by: null,
       }));
 
-      const res = await fetch("/api/assistance-record", {
+      const res = await authFetch("/api/assistance-record", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
-      if (!data.success) throw new Error(data.error);
+      if (!res.ok || !data.success) {
+        throw new Error(data.error ?? "Failed to save records.");
+      }
 
       // Re-fetch to sync server-assigned IDs and refresh the saved snapshot
       await fetchRecords();
@@ -206,44 +227,44 @@ function AssistanceRecords() {
               </thead>
               <tbody>
                 {rows.map((row, index) => (
-                  <tr key={row.id ?? `new-${index}`}>
+                  <tr key={row.tempId}>
                     <td>
-                      <input type="date" className="input input-bordered input-sm w-32"
+                      <input type="date" className="input input-bordered input-sm w-32 max-w-[45vw] sm:max-w-none"
                         value={row.assistance_date}
                         onChange={(e) => updateRow(index, "assistance_date", e.target.value)} />
                     </td>
                     <td>
-                      <input type="text" className="input input-bordered input-sm w-28"
+                      <input type="text" className="input input-bordered input-sm w-28 max-w-[45vw] sm:max-w-none"
                         value={row.receiving_family_member}
                         onChange={(e) => updateRow(index, "receiving_family_member", e.target.value)} />
                     </td>
                     <td>
-                      <input type="text" className="input input-bordered input-sm w-32"
+                      <input type="text" className="input input-bordered input-sm w-32 max-w-[45vw] sm:max-w-none"
                         value={row.emergency_disaster_type}
                         onChange={(e) => updateRow(index, "emergency_disaster_type", e.target.value)} />
                     </td>
                     <td>
-                      <input type="text" className="input input-bordered input-sm w-32"
+                      <input type="text" className="input input-bordered input-sm w-32 max-w-[45vw] sm:max-w-none"
                         value={row.assistance_type}
                         onChange={(e) => updateRow(index, "assistance_type", e.target.value)} />
                     </td>
                     <td>
-                      <input type="text" className="input input-bordered input-sm w-16"
+                      <input type="text" className="input input-bordered input-sm w-16 max-w-[35vw] sm:max-w-none"
                         value={row.unit}
                         onChange={(e) => updateRow(index, "unit", e.target.value)} />
                     </td>
                     <td>
-                      <input type="number" className="input input-bordered input-sm w-16"
+                      <input type="number" className="input input-bordered input-sm w-16 max-w-[35vw] sm:max-w-none"
                         value={row.quantity}
                         onChange={(e) => updateRow(index, "quantity", e.target.value)} />
                     </td>
                     <td>
-                      <input type="number" className="input input-bordered input-sm w-20"
+                      <input type="number" className="input input-bordered input-sm w-20 max-w-[35vw] sm:max-w-none"
                         value={row.cost}
                         onChange={(e) => updateRow(index, "cost", e.target.value)} />
                     </td>
                     <td>
-                      <input type="text" className="input input-bordered input-sm w-28"
+                      <input type="text" className="input input-bordered input-sm w-28 max-w-[45vw] sm:max-w-none"
                         value={row.provider}
                         onChange={(e) => updateRow(index, "provider", e.target.value)} />
                     </td>

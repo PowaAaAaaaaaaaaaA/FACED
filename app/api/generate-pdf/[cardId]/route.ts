@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PDFDocument, PDFPage, PDFFont, rgb, StandardFonts } from 'pdf-lib'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/require-admin'
 import * as fs from 'fs'
 import * as path from 'path'
 
@@ -344,6 +345,9 @@ export async function GET(
   { params }: { params: Promise<{ cardId: string }> }
 ) {
   try {  // ← add this back
+    const { response } = await requireAdmin(req)
+    if (response) return response
+
     const { cardId } = await params
 
     const url = new URL(req.url)
