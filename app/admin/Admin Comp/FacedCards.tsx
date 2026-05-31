@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useFacedStore, FacedCard } from "@/app/store/useFacedStore";
+import { useFacedStore } from "@/app/store/useFacedStore";
+import { authFetch } from "@/lib/auth-fetch";
 
 interface Props {
   selectedProvince: string | null;
@@ -9,9 +10,10 @@ interface Props {
 }
 
 export default function FacedCardList({ selectedProvince, searchQuery }: Props) {
-  const [cards, setCards] = useState<FacedCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const cards = useFacedStore((s) => s.cards);
+  const setCards = useFacedStore((s) => s.setCards);
 
  const filteredCards = cards
   .filter((card) => selectedProvince ? card.province === selectedProvince : true)
@@ -31,9 +33,8 @@ export default function FacedCardList({ selectedProvince, searchQuery }: Props) 
   useEffect(() => {
     async function fetchCards() {
       try {
-        const res = await fetch("/api/card-content");
+        const res = await authFetch("/api/card-content");
         const data = await res.json();
-        console.log("API raw:", data.cards[0])
         if (!data.success) throw new Error(data.error);
         setCards(data.cards);
       } catch (err) {
@@ -44,7 +45,7 @@ export default function FacedCardList({ selectedProvince, searchQuery }: Props) 
     }
 
     fetchCards();
-  }, []);
+  }, [setCards]);
 
   if (loading) {
     return (
@@ -58,7 +59,7 @@ export default function FacedCardList({ selectedProvince, searchQuery }: Props) 
 
   if (error) {
     return (
-      <div className="w-[40%] flex items-center justify-center">
+      <div className="flex w-full items-center justify-center p-4">
         <p className="text-red-500 text-sm">{error}</p>
       </div>
     );
@@ -76,21 +77,21 @@ export default function FacedCardList({ selectedProvince, searchQuery }: Props) 
   }
 
   return (
-    <div className="w-full max-h-full overflow-auto flex flex-col gap-2">
+    <div className="flex w-full gap-2 overflow-x-auto pb-1 lg:max-h-full lg:flex-col lg:overflow-y-auto lg:overflow-x-hidden">
       {filteredCards.map((card) => (
         <div
           key={card.id}
           onClick={() => setSelectedCard(card)}
-          className={`card card-border cursor-pointer transition-colors ${
+          className={`card card-border min-w-[260px] cursor-pointer transition-colors lg:min-w-0 ${
             selectedCard?.id === card.id
               ? "bg-blue-50 border-blue-400"
               : "bg-base-100 hover:bg-base-200"
           }`}
         >
-          <div className="flex justify-between p-3 items-center">
-            <div>
-              <h2 className="text-[0.9rem] font-semibold">{card.full_name}</h2>
-              <p className="text-[0.75rem] text-gray-500">
+          <div className="flex items-start justify-between gap-3 p-3">
+            <div className="min-w-0">
+              <h2 className="truncate text-[0.85rem] font-semibold sm:text-[0.9rem]">{card.full_name}</h2>
+              <p className="line-clamp-2 text-[0.72rem] text-gray-500 sm:text-[0.75rem]">
                 Brgy. {card.barangay} · {card.municipality} ·{" "}
                 {card.family_member_count} member(s)
               </p>
