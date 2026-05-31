@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import SegmentedButtons, { ActiveView } from "./Admin Comp/Toggle";
 import FacedCardList from "./Admin Comp/FacedCards";
 import PrintPanel from "./Admin Comp/PrintPanel";
@@ -29,15 +29,15 @@ function Page() {
   };
 
   return (
-    <div className="overflow-hidden">
+    <div className="min-h-screen overflow-x-hidden bg-base-200">
       <div className="w-full h-2 bg-gradient-to-r from-blue-900 via-blue-600 to-blue-400" />
-      <div className="navbar bg-base-100 shadow-sm">
-        <div className="flex-1">
-          <a className="btn btn-ghost text-xl font-bold" style={syne.style}>
+      <div className="navbar bg-base-100 shadow-sm px-3 sm:px-4">
+        <div className="min-w-0 flex-1">
+          <a className="btn btn-ghost px-2 text-lg sm:text-xl font-bold" style={syne.style}>
             FACED System
           </a>
         </div>
-        <div className="flex flex-none gap-2 items-center">
+        <div className="flex flex-none flex-wrap justify-end gap-2 items-center">
           <SegmentedButtons activeView={activeView} onChange={setActiveView} />
           <button
             onClick={handleLogout}
@@ -46,13 +46,13 @@ function Page() {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            Logout
+            <span className="hidden sm:inline">Logout</span>
           </button>
         </div>
       </div>
 
-      <div className="mt-5 flex px-5 items-center justify-between">
-        <label className="input w-full">
+      <div className="mt-4 flex flex-col gap-2 px-3 sm:px-5 md:flex-row md:items-center md:justify-between">
+        <label className="input w-full md:flex-1">
           <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <g strokeLinejoin="round" strokeLinecap="round" strokeWidth="2.5" fill="none" stroke="currentColor">
               <circle cx="11" cy="11" r="8"></circle>
@@ -67,12 +67,12 @@ function Page() {
 />
         </label>
         
-        <div>
-          <details className="dropdown">
-            <summary className="btn m-1">
+        <div className="md:shrink-0">
+          <details className="dropdown dropdown-end w-full md:w-auto">
+            <summary className="btn w-full md:w-auto">
               {selectedProvince ? `Filter: ${selectedProvince}` : "Filter"}
             </summary>
-            <ul className="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+            <ul className="menu dropdown-content bg-base-100 rounded-box z-10 mt-1 w-52 p-2 shadow-sm">
               {PROVINCES.map((province) => (
                 <li key={province}>
                   <button
@@ -88,11 +88,11 @@ function Page() {
         </div>
       </div>
 
-      <div className="flex p-4 gap-4 h-[calc(100vh-140px)] min-h-0">
-        <div className="w-[30%] overflow-auto flex flex-col gap-2 min-h-0">
+      <div className="flex flex-col p-3 sm:p-4 gap-4 min-h-0 lg:h-[calc(100vh-140px)] lg:flex-row">
+        <div className="max-h-72 min-h-0 overflow-auto lg:max-h-none lg:w-[32%] xl:w-[30%]">
           <FacedCardList selectedProvince={selectedProvince} searchQuery={searchQuery} />
         </div>
-        <div className="flex-1 bg-white rounded-lg shadow overflow-auto">
+        <div className="min-h-[60vh] flex-1 overflow-auto rounded-lg bg-white shadow lg:min-h-0">
           {activeView === "cards" ? <CardContent /> : <PrintPanel />}
         </div>
       </div>

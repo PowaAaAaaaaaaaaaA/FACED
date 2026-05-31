@@ -228,42 +228,42 @@ function AssistanceRecords() {
                 {rows.map((row, index) => (
                   <tr key={row.tempId}>
                     <td>
-                      <input type="date" className="input input-bordered input-sm w-32"
+                     <input type="date" className="input input-bordered input-sm w-32 max-w-[45vw] sm:max-w-none"
                         value={row.assistance_date}
                         onChange={(e) => updateRow(index, "assistance_date", e.target.value)} />
                     </td>
                     <td>
-                      <input type="text" className="input input-bordered input-sm w-28"
+                      <input type="text" className="input input-bordered input-sm w-28 max-w-[45vw] sm:max-w-none"
                         value={row.receiving_family_member}
                         onChange={(e) => updateRow(index, "receiving_family_member", e.target.value)} />
                     </td>
                     <td>
-                      <input type="text" className="input input-bordered input-sm w-32"
+                      <input type="text" className="input input-bordered input-sm w-32 max-w-[45vw] sm:max-w-none"
                         value={row.emergency_disaster_type}
                         onChange={(e) => updateRow(index, "emergency_disaster_type", e.target.value)} />
                     </td>
                     <td>
-                      <input type="text" className="input input-bordered input-sm w-32"
+                      <input type="text" className="input input-bordered input-sm w-32 max-w-[45vw] sm:max-w-none"
                         value={row.assistance_type}
                         onChange={(e) => updateRow(index, "assistance_type", e.target.value)} />
                     </td>
                     <td>
-                      <input type="text" className="input input-bordered input-sm w-16"
+                      <input type="text" className="input input-bordered input-sm w-16 max-w-[35vw] sm:max-w-none"
                         value={row.unit}
                         onChange={(e) => updateRow(index, "unit", e.target.value)} />
                     </td>
                     <td>
-                      <input type="number" className="input input-bordered input-sm w-16"
+                      <input type="number" className="input input-bordered input-sm w-16 max-w-[35vw] sm:max-w-none"
                         value={row.quantity}
                         onChange={(e) => updateRow(index, "quantity", e.target.value)} />
                     </td>
                     <td>
-                      <input type="number" className="input input-bordered input-sm w-20"
+                      <input type="number" className="input input-bordered input-sm w-20 max-w-[35vw] sm:max-w-none"
                         value={row.cost}
                         onChange={(e) => updateRow(index, "cost", e.target.value)} />
                     </td>
                     <td>
-                      <input type="text" className="input input-bordered input-sm w-28"
+                      <input type="text" className="input input-bordered input-sm w-28 max-w-[45vw] sm:max-w-none"
                         value={row.provider}
                         onChange={(e) => updateRow(index, "provider", e.target.value)} />
                     </td>

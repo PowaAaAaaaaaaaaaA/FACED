@@ -206,12 +206,12 @@ function FamilyMembers() {
 
   return (
     <div className="h-full w-full p-2">
-      <div className="mb-3 flex items-center justify-between gap-2">
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <span className="bg-blue-100 text-blue-700 font-semibold text-sm px-3 py-1 rounded">
           FAMILY MEMBERS
         </span>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {error && <p className="text-xs text-red-500">{error}</p>}
           {success && (
             <p className="text-xs text-green-600">Family members saved.</p>
@@ -393,7 +393,7 @@ function TextCell({
   return (
     <input
       type={type}
-      className="input input-bordered input-xs w-32"
+      className="input input-bordered input-xs w-32 max-w-[45vw] sm:max-w-none"
       value={value}
       onChange={(e) => onChange(e.target.value)}
     />
@@ -430,7 +430,7 @@ function SelectCell({
 
   return (
     <select
-      className="select select-bordered select-xs w-32"
+      className="select select-bordered select-xs w-32 max-w-[45vw] sm:max-w-none"
       value={value}
       onChange={(e) => onChange(e.target.value)}
     >

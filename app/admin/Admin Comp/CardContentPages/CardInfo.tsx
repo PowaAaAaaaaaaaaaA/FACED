@@ -215,9 +215,10 @@ function CardInfo() {
     setSuccess(false);
   }, [selectedCard]);
 
+  
   if (!selectedCard || !form) {
     return (
-      <div className="h-full w-full p-2 flex justify-center items-center mt-10 gap-5 text-2xl text-gray-400">
+      <div className="mt-10 flex h-full w-full flex-col items-center justify-center gap-3 p-4 text-center text-lg text-gray-400 sm:flex-row sm:text-2xl">
         <BiErrorCircle />
         <h1>Please Select a FACED Card to view the details</h1>
       </div>
@@ -328,7 +329,7 @@ function CardInfo() {
 
   return (
     <div className="w-full p-2 overflow-auto">
-      <div className="mb-3 flex items-center justify-end gap-2">
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
         {error && <p className="mr-auto text-xs text-red-500">{error}</p>}
         {success && (
           <p className="mr-auto text-xs text-green-600">Card saved successfully.</p>
@@ -354,10 +355,10 @@ function CardInfo() {
       </div>
 
       <div>
-        <h2 className="rounded-2xl text-[0.9rem] w-[15%] p-1 text-center font-bold text-[#0F2F9A] bg-[#D5EDFF]">
+        <h2 className="w-fit rounded-2xl px-3 py-1 text-center text-[0.8rem] font-bold text-[#0F2F9A] bg-[#D5EDFF] sm:text-[0.9rem]">
           LOCATION
         </h2>
-        <div className="grid grid-cols-3 p-1 w-full mt-2 gap-3">
+        <div className="grid w-full grid-cols-1 gap-3 p-1 mt-2 sm:grid-cols-2 xl:grid-cols-3">
           <ReadOnly label="REGION" value={selectedCard.region} />
           <ReadOnly label="PROVINCE" value={selectedCard.province} />
           <ReadOnly label="CITY / MUNICIPALITY" value={selectedCard.municipality} />
@@ -374,10 +375,10 @@ function CardInfo() {
       </div>
 
       <div className="mt-2">
-        <h2 className="rounded-2xl w-[24%] p-1 text-center font-bold text-[#0F2F9A] bg-[#D5EDFF] text-[0.9rem]">
+        <h2 className="w-fit rounded-2xl px-3 py-1 text-center font-bold text-[#0F2F9A] bg-[#D5EDFF] text-[0.8rem] sm:text-[0.9rem]">
           HEAD OF FAMILY
         </h2>
-        <div className="grid grid-cols-4 p-1 w-full mt-2 gap-3">
+        <div className="grid w-full grid-cols-1 gap-3 p-1 mt-2 sm:grid-cols-2 xl:grid-cols-4">
           <Field form={form} isEditing={isEditing} label="LAST NAME" name="last_name" onChange={updateForm} />
           <Field form={form} isEditing={isEditing} label="FIRST NAME" name="first_name" onChange={updateForm} />
           <Field form={form} isEditing={isEditing} label="MIDDLE NAME" name="middle_name" onChange={updateForm} />
@@ -404,10 +405,10 @@ function CardInfo() {
       </div>
 
       <div className="mt-2">
-        <h2 className="rounded-2xl w-[33%] p-1 text-center font-bold text-[#0F2F9A] bg-[#D5EDFF] text-[0.9rem]">
+        <h2 className="w-fit rounded-2xl px-3 py-1 text-center font-bold text-[#0F2F9A] bg-[#D5EDFF] text-[0.8rem] sm:text-[0.9rem]">
           ACCOUNT INFORMATION
         </h2>
-        <div className="grid grid-cols-3 p-1 w-full mt-2 gap-3">
+        <div className="grid w-full grid-cols-1 gap-3 p-1 mt-2 sm:grid-cols-2 xl:grid-cols-3">
           <ProviderField
             isEditing={isEditing}
             value={providerLabelFromForm(form)}
@@ -432,10 +433,10 @@ function CardInfo() {
       </div>
 
       <div className="mt-2">
-        <h2 className="rounded-2xl w-[33%] p-1 text-center font-bold text-[#0F2F9A] bg-[#D5EDFF] text-[0.9rem]">
+        <h2 className="w-fit rounded-2xl px-3 py-1 text-center font-bold text-[#0F2F9A] bg-[#D5EDFF] text-[0.8rem] sm:text-[0.9rem]">
           OTHER DETAILS
         </h2>
-        <div className="grid grid-cols-3 p-1 w-full mt-2 gap-3">
+        <div className="grid w-full grid-cols-1 gap-3 p-1 mt-2 sm:grid-cols-2 xl:grid-cols-3">
           <CheckField
             checked={form.is_4ps_beneficiary}
             isEditing={isEditing}
